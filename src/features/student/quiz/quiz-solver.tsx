@@ -5,27 +5,30 @@ import { useEffect } from "react";
 import { ActionButton } from "@/components/ui/action-button";
 import { routeBuilders } from "@/config/routes";
 import { formatElapsed } from "@/features/student/quiz/format-time";
-import { quizQuestionFixtures } from "@/features/student/quiz/mock-data";
+import { useQuizQuery } from "@/features/student/quiz/queries";
 import { useQuizSessionStore } from "@/stores/quiz-session.store";
-import { worksheetFixtures } from "@/features/student/worksheets/mock-data";
 
 export function QuizSolver({ worksheetId }: { worksheetId: string }) {
   const router = useRouter();
+  const { data, isLoading, isError, refetch } = useQuizQuery(worksheetId);
   const { currentIndex, answers, elapsedSecondsByQuestion, timerStatus, start, moveTo, selectAnswer, addElapsedSeconds, pauseForQuestion } = useQuizSessionStore();
-  const worksheet = worksheetFixtures.find((item) => item.id === worksheetId) ?? worksheetFixtures[0];
-  const questions = quizQuestionFixtures.slice(0, Math.min(worksheet.questionCount, quizQuestionFixtures.length));
+  const worksheet = data?.worksheet;
+  const questions = data?.questions ?? [];
   const safeIndex = Math.min(currentIndex, questions.length - 1);
-  const question = questions[safeIndex] ?? questions[0];
-  const selectedAnswer = answers[question.id];
+  const question = questions[safeIndex];
+  const selectedAnswer = question ? answers[question.id] : undefined;
 
   useEffect(() => { start(worksheetId); }, [start, worksheetId]);
   useEffect(() => {
-    if (timerStatus !== "running") return;
+    if (timerStatus !== "running" || !question) return;
     const interval = window.setInterval(() => {
       if (useQuizSessionStore.getState().timerStatus === "running") addElapsedSeconds(question.id, 1);
     }, 1000);
     return () => window.clearInterval(interval);
-  }, [addElapsedSeconds, question.id, timerStatus]);
+  }, [addElapsedSeconds, question, timerStatus]);
+
+  if (isLoading) return <div className="space-y-3 p-5"><div className="h-12 animate-pulse bg-[#E9EDF2]" /><div className="h-64 animate-pulse rounded-card bg-[#E9EDF2]" /></div>;
+  if (isError || !worksheet || !question) return <div className="p-8 text-center"><p className="text-sm font-bold">문제를 불러오지 못했어요.</p><button onClick={() => refetch()} className="mt-4 rounded-xl bg-brand px-5 py-2 text-sm font-bold">다시 시도</button></div>;
 
   const goQuestion = () => { pauseForQuestion(); router.push(routeBuilders.student.worksheetQuestion(worksheetId)); };
   const goNext = () => safeIndex === questions.length - 1 ? router.push(routeBuilders.student.submitWorksheet(worksheetId)) : moveTo(safeIndex + 1);

@@ -1,12 +1,13 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { mockLearningRecordGateway } from "@/features/student/records/api";
+import { learningRecordGateway } from "@/features/student/records/api";
+import { queryKeys } from "@/lib/api/query-keys";
 
 export function useLearningRecordsQuery() {
-  return useQuery({ queryKey: ["student", "learning-records"], queryFn: () => mockLearningRecordGateway.list() });
+  return useQuery({ queryKey: queryKeys.student.records(), queryFn: () => learningRecordGateway.list() });
 }
 
 export function useLearningRecordQuery(recordId: string) {
-  return useQuery({ queryKey: ["student", "learning-records", recordId], queryFn: () => mockLearningRecordGateway.get(recordId) });
+  return useQuery({ queryKey: [...queryKeys.student.records(), recordId], queryFn: () => learningRecordGateway.get(recordId) });
 }

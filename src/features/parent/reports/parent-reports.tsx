@@ -5,17 +5,25 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { routeBuilders } from "@/config/routes";
-import { parentReports } from "@/features/parent/shared/mock-data";
+import { useParentReportQuery, useParentReportsQuery } from "@/features/parent/api/queries";
+import { useSelectedChild } from "@/features/parent/shared/parent.store";
 
 export function ParentReportList() {
   const [year, setYear] = useState(2026);
-  const reports = parentReports.filter((item) => item.year === year);
+  const child = useSelectedChild();
+  const { data = [], isLoading, isError, refetch } = useParentReportsQuery(child?.studentId ?? "");
+  const reports = data.filter((item) => item.year === year);
+  if (isLoading) return <div className="space-y-3 p-5"><div className="h-10 w-24 animate-pulse rounded-lg bg-[#E9EDF2]" /><div className="h-56 animate-pulse rounded-card bg-[#E9EDF2]" /></div>;
+  if (isError) return <div className="p-8 text-center"><p className="text-sm font-bold">보고서를 불러오지 못했어요.</p><button onClick={() => refetch()} className="mt-4 rounded-xl bg-brand px-5 py-2 text-sm font-bold">다시 시도</button></div>;
   return <div className="px-5 py-4"><select aria-label="보고서 연도" value={year} onChange={(event) => setYear(Number(event.target.value))} className="mb-4 h-10 rounded-lg bg-transparent text-base font-bold outline-none"><option value={2026}>2026년</option><option value={2025}>2025년</option></select>{reports.length ? <section className="overflow-hidden rounded-card border border-border bg-surface">{reports.map((report) => <Link key={report.id} href={routeBuilders.parent.report(report.id)} className={`flex min-h-[76px] items-center gap-3 border-b border-divider px-4 py-3 last:border-0 ${report.isNew ? "bg-[#FFFDF0]" : ""}`}><div className="min-w-0 flex-1"><div className="flex items-center gap-2">{report.isNew ? <span className="rounded-md bg-brand px-2 py-1 text-[11px] font-bold text-[#7D452C]">NEW</span> : null}<h2 className="font-bold">{report.year}년 {report.month}월</h2></div><p className="mt-1 text-xs text-subtle">{report.teacher} · {report.pages}페이지 · {report.issuedAt} 발행</p></div>{!report.isNew ? <span className="text-xs text-subtle">확인</span> : null}<ChevronRight size={17} className="text-subtle" /></Link>)}</section> : <EmptyReport />}</div>;
 }
 
 export function ParentReportDetail({ reportId }: { reportId: string }) {
-  const report = parentReports.find((item) => item.id === reportId);
+  const child = useSelectedChild();
+  const { data: report, isLoading, isError, refetch } = useParentReportQuery(child?.studentId ?? "", reportId);
   const [shared, setShared] = useState(false);
+  if (isLoading) return <div className="space-y-3 p-5"><div className="h-56 animate-pulse rounded-card bg-[#E9EDF2]" /><div className="h-40 animate-pulse rounded-card bg-[#E9EDF2]" /></div>;
+  if (isError) return <div className="p-8 text-center"><p className="text-sm font-bold">보고서를 불러오지 못했어요.</p><button onClick={() => refetch()} className="mt-4 rounded-xl bg-brand px-5 py-2 text-sm font-bold">다시 시도</button></div>;
   if (!report) return <div className="p-8 text-center text-sm text-muted">보고서를 찾을 수 없습니다.</div>;
   async function share() {
     const data = { title: `Check-On ${report!.year}년 ${report!.month}월 보고서`, text: "김민준 학생의 월별 학습 보고서입니다.", url: window.location.href };

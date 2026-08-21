@@ -3,10 +3,15 @@
 import Link from "next/link";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { routeBuilders } from "@/config/routes";
-import { accuracyTrend, parentRecords } from "@/features/parent/shared/mock-data";
+import { useParentRecordQuery } from "@/features/parent/api/queries";
+import { accuracyTrend } from "@/features/parent/shared/mock-data";
+import { useSelectedChild } from "@/features/parent/shared/parent.store";
 
 export function ParentRecordDetail({ recordId }: { recordId: string }) {
-  const record = parentRecords.find((item) => item.id === recordId);
+  const child = useSelectedChild();
+  const { data: record, isLoading, isError, refetch } = useParentRecordQuery(child?.studentId ?? "", recordId);
+  if (isLoading) return <div className="space-y-3 p-5"><div className="h-20 animate-pulse rounded-card bg-[#E9EDF2]" /><div className="h-52 animate-pulse rounded-card bg-[#E9EDF2]" /></div>;
+  if (isError) return <div className="p-8 text-center"><p className="text-sm font-bold">학습기록을 불러오지 못했어요.</p><button onClick={() => refetch()} className="mt-4 rounded-xl bg-brand px-5 py-2 text-sm font-bold">다시 시도</button></div>;
   if (!record) return <div className="p-8 text-center text-sm text-muted">해당 학습기록을 찾을 수 없습니다.</div>;
   return <div className="space-y-4 px-5 py-4">
     <section className="rounded-card border border-border bg-surface p-4"><h2 className="font-bold">{record.title}</h2><p className="mt-2 text-xs text-subtle">2026.{record.date} · {record.questionCount}문항 · 정답률 {record.accuracy}% · {record.elapsed}</p></section>

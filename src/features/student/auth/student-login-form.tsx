@@ -11,10 +11,12 @@ import { FormField } from "@/components/ui/form-field";
 import { ROUTES } from "@/config/routes";
 import { studentLoginSchema, type StudentLoginValues } from "@/features/student/auth/schema";
 import { useStudentAuthStore } from "@/features/student/auth/student-auth.store";
+import { useLoginMutation } from "@/features/auth/mutations";
 
 export function StudentLoginForm() {
   const router = useRouter();
   const status = useStudentAuthStore((state) => state.status);
+  const loginMutation = useLoginMutation();
   const [showPassword, setShowPassword] = useState(false);
   const { register, handleSubmit, setError, formState: { errors, isSubmitting, isValid } } = useForm<StudentLoginValues>({ mode: "onChange" });
 
@@ -27,7 +29,7 @@ export function StudentLoginForm() {
       });
       return;
     }
-    router.push(status === "active" ? ROUTES.student.home : ROUTES.auth.studentActivationPending);
+    try { const session = await loginMutation.mutateAsync({ role: "student", loginId: result.data.studentId, password: result.data.password }); router.push(session.accountStatus === "active" && status === "active" ? ROUTES.student.home : ROUTES.auth.studentActivationPending); } catch { setError("root", { message: "로그인에 실패했습니다. 입력 정보를 확인해 주세요." }); }
   });
 
   return (
@@ -51,7 +53,7 @@ export function StudentLoginForm() {
             trailing={<button type="button" className="grid size-8 place-items-center text-subtle" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 보기"}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>}
             {...register("password")}
           />
-          <ActionButton type="submit" disabled={!isValid || isSubmitting}>로그인</ActionButton>
+          {errors.root?.message ? <p className="text-xs font-semibold text-[#D64545]">{errors.root.message}</p> : null}<ActionButton type="submit" disabled={!isValid || isSubmitting || loginMutation.isPending}>{loginMutation.isPending ? "로그인 중..." : "로그인"}</ActionButton>
           <ActionLink href={ROUTES.auth.studentSignupTerms} variant="secondary">학생 회원가입</ActionLink>
           <p className="pt-1 text-center text-xs text-subtle">학생 ID 찾기 · 비밀번호 재설정</p>
         </form>

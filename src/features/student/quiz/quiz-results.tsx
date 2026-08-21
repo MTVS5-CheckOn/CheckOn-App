@@ -4,24 +4,28 @@ import { ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { formatElapsed } from "@/features/student/quiz/format-time";
-import { quizQuestionFixtures } from "@/features/student/quiz/mock-data";
+import { useQuizQuery } from "@/features/student/quiz/queries";
 import { useQuizSessionStore } from "@/stores/quiz-session.store";
 import { routeBuilders } from "@/config/routes";
-import { learningRecordFixtures } from "@/features/student/records/mock-data";
+import { useLearningRecordsQuery } from "@/features/student/records/queries";
 import { useLearningRecordStore } from "@/features/student/records/learning-record.store";
 
 type ResultFilter = "all" | "correct" | "incorrect";
 
 export function QuizResults({ worksheetId }: { worksheetId: string }) {
+  const { data: quiz, isLoading: quizLoading, isError: quizError, refetch } = useQuizQuery(worksheetId);
+  const { data: records = [], isLoading: recordsLoading } = useLearningRecordsQuery();
   const { answers, elapsedSecondsByQuestion, worksheetId: activeWorksheetId, timerStatus } = useQuizSessionStore();
   const submittedRecord = useLearningRecordStore((state) => state.submittedRecords.find((item) => item.worksheetId === worksheetId));
-  const storedRecord = submittedRecord ?? learningRecordFixtures.find((item) => item.worksheetId === worksheetId);
+  const storedRecord = submittedRecord ?? records.find((item) => item.worksheetId === worksheetId);
   const hasSubmittedSession = activeWorksheetId === worksheetId && timerStatus === "submitted";
   const resolvedAnswers = hasSubmittedSession ? answers : Object.fromEntries((storedRecord?.questions ?? []).map((question) => [`q${question.number}`, question.answer]));
   const resolvedElapsed = hasSubmittedSession ? elapsedSecondsByQuestion : Object.fromEntries((storedRecord?.questions ?? []).map((question) => [`q${question.number}`, question.elapsedSeconds]));
   const [filter, setFilter] = useState<ResultFilter>("all");
   const [openQuestionId, setOpenQuestionId] = useState<string | null>(null);
-  const results = useMemo(() => quizQuestionFixtures.slice(0, storedRecord?.questionCount ?? quizQuestionFixtures.length).map((question) => ({ ...question, answer: resolvedAnswers[question.id], correct: resolvedAnswers[question.id] === question.correctAnswer, elapsed: resolvedElapsed[question.id] ?? 0 })), [resolvedAnswers, resolvedElapsed, storedRecord?.questionCount]);
+  const results = useMemo(() => (quiz?.questions ?? []).slice(0, storedRecord?.questionCount ?? quiz?.questions.length ?? 0).map((question) => ({ ...question, answer: resolvedAnswers[question.id], correct: resolvedAnswers[question.id] === question.correctAnswer, elapsed: resolvedElapsed[question.id] ?? 0 })), [quiz?.questions, resolvedAnswers, resolvedElapsed, storedRecord?.questionCount]);
+  if (quizLoading || recordsLoading) return <div className="p-5"><div className="h-96 animate-pulse rounded-card bg-[#E9EDF2]" /></div>;
+  if (quizError || !quiz) return <div className="p-8 text-center"><p className="text-sm font-bold">채점 결과를 불러오지 못했어요.</p><button onClick={() => refetch()} className="mt-4 rounded-xl bg-brand px-5 py-2 text-sm font-bold">다시 시도</button></div>;
   if (!hasSubmittedSession && !storedRecord) return <div className="px-5 py-10 text-center"><h2 className="text-lg font-bold">아직 채점 결과가 없어요</h2><p className="mt-2 text-sm text-muted">학습지를 모두 푼 뒤 답안을 제출하면 결과를 확인할 수 있습니다.</p><Link href={routeBuilders.student.solveWorksheet(worksheetId)} className="mt-5 flex h-[52px] items-center justify-center rounded-xl bg-brand text-sm font-bold">문제 풀기 시작</Link></div>;
   const correctCount = results.filter((result) => result.correct).length;
   const incorrectCount = results.length - correctCount;

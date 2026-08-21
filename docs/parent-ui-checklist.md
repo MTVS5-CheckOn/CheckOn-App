@@ -20,3 +20,11 @@ Figma `Parent / Main Screens`를 구현 원장으로 사용한다. 공통 기준
 - `features/parent/shared/parent.store.ts`: 선택 자녀, Dialog 상태 등 클라이언트 상태만 유지
 - 인증, 자녀 등록, 초대 코드 등록은 서버 mutation 연결 후 성공/도메인 오류 코드를 현재 UI 상태에 매핑
 - 전국 백분위의 기준일·표본 설명은 API 응답과 함께 표시하고 교사 전용 데이터는 포함하지 않음
+
+## API 연결 준비 완료
+
+- 학부모 조회 화면은 `features/parent/api` gateway와 TanStack Query를 통해 데이터 수신
+- 자녀 등록·초대 코드는 mutation과 query cache invalidation 적용
+- Mock/HTTP gateway는 `NEXT_PUBLIC_DATA_SOURCE`로 전환
+- 공통 timeout, network error, 인증 헤더, credentials 처리 적용
+- 실제 연동 endpoint와 오류 코드 초안은 `docs/api-integration-readiness.md`에서 관리
