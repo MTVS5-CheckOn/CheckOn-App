@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ProgressBar } from "@/components/ui/progress-bar";
-import { ROUTES, routeBuilders } from "@/config/routes";
+import { routeBuilders } from "@/config/routes";
 import { studentHomeData, type WorksheetSummary } from "@/features/student/home/model";
 
 function WorksheetCard({ item }: { item: WorksheetSummary }) {
@@ -13,7 +13,7 @@ function WorksheetCard({ item }: { item: WorksheetSummary }) {
 export function StudentHome() {
   const { weakness, today, continuing } = studentHomeData;
   return <div className="space-y-6 p-5">
-    <section className="relative overflow-hidden rounded-lg bg-brand p-5 text-[#4C3024]"><div className="absolute -right-7 -top-7 size-24 rounded-full bg-white/25" /><p className="text-xs font-semibold opacity-70">학습 취약 영역</p><h1 className="mt-1 text-[22px] font-bold leading-[33px]">{weakness.area}</h1><p className="mt-0.5 text-[13px] opacity-80">{weakness.description}</p><div className="mt-4 flex items-center gap-2"><div className="min-w-0 flex-1"><ProgressBar value={weakness.accuracy} tone="ink" /></div><strong className="text-xs">{weakness.accuracy}%</strong></div><Link href={ROUTES.student.worksheets} className="mt-5 inline-flex min-h-9 items-center rounded-full bg-[#79523D] px-4 text-[13px] font-semibold text-white">문제 풀기</Link></section>
+    <section className="relative overflow-hidden rounded-lg bg-brand p-5 text-[#4C3024]"><div className="absolute -right-7 -top-7 size-24 rounded-full bg-white/25" /><p className="text-xs font-semibold opacity-70">학습 취약 영역</p><h1 className="mt-1 text-[22px] font-bold leading-[33px]">{weakness.area}</h1><p className="mt-0.5 text-[13px] opacity-80">{weakness.description}</p><div className="mt-4 flex items-center gap-2"><div className="min-w-0 flex-1"><ProgressBar value={weakness.accuracy} tone="ink" /></div><strong className="text-xs">{weakness.accuracy}%</strong></div><Link href={routeBuilders.student.solveWorksheet("l2")} className="mt-5 inline-flex min-h-9 items-center rounded-full bg-[#79523D] px-4 text-[13px] font-semibold text-white">문제 풀기</Link></section>
     <section className="space-y-3"><p className="text-xs font-semibold uppercase tracking-[0.3px] text-subtle">오늘의 학습</p>{today.map((item) => <WorksheetCard key={item.id} item={item} />)}</section>
     <section className="space-y-3"><p className="text-xs font-semibold uppercase tracking-[0.3px] text-subtle">이어 풀기</p><Link href={routeBuilders.student.solveWorksheet(continuing.id)} className="block"><Card className="flex items-center gap-3 p-4"><div className="grid size-10 shrink-0 place-items-center rounded-md bg-[#EEF4FF] font-bold text-action">{continuing.completed}</div><div className="min-w-0 flex-1"><h3 className="truncate text-sm font-semibold">{continuing.title}</h3><p className="mt-0.5 text-xs text-muted">{continuing.meta}</p><div className="mt-2"><ProgressBar value={(continuing.completed! / continuing.total!) * 100} /></div></div><ChevronRight aria-hidden size={18} className="text-[#9AA8BC]" /></Card></Link></section>
   </div>;

@@ -33,7 +33,7 @@ export function StudentShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative mx-auto min-h-dvh w-full max-w-[390px] bg-app shadow-[0_0_40px_rgb(32_41_57/12%)]">
       <AppBar title={chrome.title} backHref={chrome.backHref} action={chrome.action} hasNotification={chrome.notification} />
-      <main className={`min-h-[calc(100dvh-76px)] ${chrome.bottomNavigation ? "pb-[calc(80px+env(safe-area-inset-bottom))]" : "pb-[calc(84px+env(safe-area-inset-bottom))]"}`}>{children}</main>
+      <main className={`min-h-[calc(100dvh-76px)] ${chrome.bottomNavigation ? "pb-[calc(80px+env(safe-area-inset-bottom))]" : ""}`}>{children}</main>
       {chrome.bottomNavigation ? <BottomNavigation mode="student" /> : null}
     </div>
   );

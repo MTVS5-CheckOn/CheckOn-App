@@ -36,12 +36,12 @@ export function QuizSolver({ worksheetId }: { worksheetId: string }) {
         <div className="flex h-[52px] items-center justify-between px-5 text-sm font-bold"><span className="text-action">{safeIndex + 1} / {questions.length}</span><time className="text-lg text-[#D96534]">{formatElapsed(elapsedSecondsByQuestion[question.id] ?? 0)}</time></div>
         <div className="h-1 bg-[#E8EBEF]"><span className="block h-full bg-brand transition-[width]" style={{ width: `${((safeIndex + 1) / questions.length) * 100}%` }} /></div>
       </div>
-      <main className="flex-1 space-y-3 px-5 py-5">
+      <main className="flex-1 space-y-3 px-5 pb-44 pt-5">
         {question.passage ? <section className="whitespace-pre-line rounded-card border border-border bg-surface p-4 text-sm leading-7 text-muted">{question.passage}</section> : null}
         <section className="rounded-card border border-border bg-surface p-4 shadow-[var(--checkon-shadow-card)]"><p className="text-xs font-bold text-[#D96534]">{question.area} · {question.skill}</p><h2 className="mt-3 text-[17px] font-extrabold leading-7">{question.stem}</h2></section>
         <fieldset className="space-y-2.5"><legend className="sr-only">답안 선택</legend>{question.options.map((option, index) => { const answer = index + 1; const selected = answer === selectedAnswer; return <label key={option} className={`flex min-h-[60px] cursor-pointer items-center rounded-[14px] border px-4 text-[15px] leading-6 ${selected ? "border-brand bg-[#FFF6F0] font-semibold" : "border-border bg-surface"}`}><input type="radio" name={question.id} value={answer} checked={selected} onChange={() => selectAnswer(question.id, answer)} className="sr-only" /><span className="mr-2 font-bold">{answer}.</span>{option}</label>; })}</fieldset>
       </main>
-      <div className="sticky bottom-0 space-y-2 border-t border-divider bg-surface px-5 pb-[calc(16px+env(safe-area-inset-bottom))] pt-3">
+      <div className="sticky bottom-0 z-20 space-y-2 border-t border-divider bg-surface/95 px-5 pb-[calc(16px+env(safe-area-inset-bottom))] pt-3 shadow-[0_-8px_24px_rgb(32_41_57/6%)] backdrop-blur">
         <ActionButton variant="ghost" onClick={goQuestion}>이 문제 질문</ActionButton>
         <div className="grid grid-cols-2 gap-2"><ActionButton variant="ghost" disabled={safeIndex === 0} onClick={() => moveTo(safeIndex - 1)}>이전 문제</ActionButton><ActionButton onClick={goNext}>{safeIndex === questions.length - 1 ? "답안 제출" : "다음 문제"}</ActionButton></div>
       </div>

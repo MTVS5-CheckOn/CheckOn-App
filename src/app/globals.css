@@ -51,6 +51,8 @@ body {
 }
 button, input, select, textarea { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
 @media (min-width: 640px) { body { display: flex; justify-content: center; } }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
