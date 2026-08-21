@@ -1,0 +1,2 @@
+import Link from "next/link";
+export default function NotFound() { return <main className="mx-auto grid min-h-dvh w-full max-w-[390px] place-items-center bg-app p-5 text-center"><section><p className="text-5xl font-extrabold text-brand">404</p><h1 className="mt-4 text-lg font-bold">페이지를 찾을 수 없어요</h1><p className="mt-2 text-sm text-muted">주소가 변경되었거나 삭제된 화면입니다.</p><Link href="/" className="mt-5 inline-flex h-12 items-center rounded-xl bg-brand px-6 text-sm font-bold">처음으로 이동</Link></section></main>; }

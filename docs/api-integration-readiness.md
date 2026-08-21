@@ -8,6 +8,7 @@
 NEXT_PUBLIC_DATA_SOURCE=mock
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8080/api
 NEXT_PUBLIC_API_TIMEOUT_MS=10000
+NEXT_PUBLIC_API_RESPONSE_MODE=auto
 ```
 
 - `mock`: 현재 프론트 단독 개발·시연 모드
@@ -25,7 +26,7 @@ page → feature component → query/mutation hook → gateway interface
 
 - React 컴포넌트에서 `fetch`를 직접 호출하지 않는다.
 - 서버 데이터는 TanStack Query, 화면 전용 상태와 진행 중 세션은 Zustand에 둔다.
-- API DTO가 확정되면 gateway에서 화면 domain 타입으로 변환한다.
+- API DTO와 화면 domain 타입은 `api/dto.ts`와 `api/adapters.ts`로 분리한다. 계약 변경은 adapter에서 흡수한다.
 - API 오류는 `ApiError`의 `status`, `code`, `details`로 표준화한다.
 - 모든 조회 화면은 loading, empty, error, retry 상태를 가져야 한다.
 
@@ -42,6 +43,14 @@ page → feature component → query/mutation hook → gateway interface
 | 자녀 조회 | GET | `/v1/parents/me/children/verification?studentId={studentId}` |
 | 자녀 등록 | POST | `/v1/parents/me/children` |
 | 강사 초대 코드 | POST | `/v1/parents/me/invitations` |
+| 내 정보 | GET | `/v1/parents/me/profile` |
+| 알림 수신 설정 | PATCH | `/v1/parents/me/profile/notifications` |
+| 알림 목록 | GET | `/v1/parents/me/notifications` |
+| 알림 읽음 | POST | `/v1/parents/me/notifications/{notificationId}/read` |
+| 전체 알림 읽음 | POST | `/v1/parents/me/notifications/read-all` |
+| 상담 목록·상세 | GET | `/v1/parents/me/children/{studentId}/consultations`, `/v1/parents/me/children/{studentId}/consultations/{consultationId}` |
+| 상담 요청 | POST | `/v1/parents/me/consultations` |
+| 상담 취소 | POST | `/v1/parents/me/children/{studentId}/consultations/{consultationId}/cancellation` |
 
 ## 현재 준비된 학생 endpoint
 
@@ -56,6 +65,10 @@ page → feature component → query/mutation hook → gateway interface
 | 질문 목록·상세 | GET | `/v1/students/me/questions`, `/v1/students/me/questions/{questionId}` |
 | 질문 작성 | POST | `/v1/students/me/questions` |
 | 추가 질문 | POST | `/v1/students/me/questions/{questionId}/follow-ups` |
+| 내 정보 | GET | `/v1/students/me/profile` |
+| 알림 수신 설정 | PATCH | `/v1/students/me/profile/notifications` |
+| 초대 코드 조회·등록 | GET, POST | `/v1/students/me/invitations/verification`, `/v1/students/me/invitations` |
+| 활성화 상태 확인 | GET | `/v1/auth/student/activation-status` |
 
 로그인·회원가입·로그아웃은 `features/auth` gateway를 통해 `/v1/auth/*` 계약으로 분리했다. 현재 Zustand에는 답안 임시 저장, 타이머 등 서버 응답이 아닌 클라이언트 세션 상태만 남긴다. 질문 Mock 저장소는 mock gateway 내부 구현으로만 사용하며 UI에서는 query/mutation을 통해 접근한다.
 
@@ -81,3 +94,10 @@ HTTP 상태와 문구가 달라져도 컴포넌트는 `code`를 기준으로 상
 6. 캐시 무효화와 재요청 범위 검증
 7. 실제 PDF Content-Type, 파일명, 다운로드 권한 검증
 8. 학생/학부모 권한으로 상대 앱 endpoint 접근 차단 검증
+
+## 자동 검증
+
+- `pnpm typecheck`: DTO·domain·컴포넌트 타입 계약
+- `pnpm lint`: Next.js 및 React 정적 검사
+- `pnpm test`: Vitest + MSW API 계약·adapter·날짜 테스트
+- `pnpm test:e2e`: Playwright 학생 학습 진입·학부모 상담 진입 핵심 흐름

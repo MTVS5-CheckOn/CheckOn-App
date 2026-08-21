@@ -8,17 +8,20 @@ import { useLearningRecordsQuery } from "@/features/student/records/queries";
 import { useLearningRecordStore } from "@/features/student/records/learning-record.store";
 import type { RecordArea } from "@/features/student/records/types";
 import { formatElapsed } from "@/features/student/quiz/format-time";
+import { formatMonthLabel } from "@/lib/format/date";
 
 type AreaFilter = "전체" | RecordArea;
 const AREAS: AreaFilter[] = ["전체", "화법과작문", "언어·매체", "독서", "문학"];
 
 export function LearningRecordList() {
-  const [month, setMonth] = useState("2026-08");
+  const [month, setMonth] = useState("");
   const [area, setArea] = useState<AreaFilter>("전체");
   const { data = [], isLoading, isError, refetch } = useLearningRecordsQuery();
   const submittedRecords = useLearningRecordStore((state) => state.submittedRecords);
   const allRecords = useMemo(() => [...submittedRecords, ...data.filter((record) => !submittedRecords.some((submitted) => submitted.worksheetId === record.worksheetId))], [data, submittedRecords]);
-  const records = useMemo(() => allRecords.filter((record) => record.month === month && (area === "전체" || record.area === area)), [allRecords, area, month]);
+  const months = useMemo(() => [...new Set(allRecords.map((record) => record.month))].sort().reverse(), [allRecords]);
+  const selectedMonth = months.includes(month) ? month : months[0] ?? "";
+  const records = useMemo(() => allRecords.filter((record) => record.month === selectedMonth && (area === "전체" || record.area === area)), [allRecords, area, selectedMonth]);
   const totalQuestions = records.reduce((sum, record) => sum + record.questionCount, 0);
   const totalCorrect = records.reduce((sum, record) => sum + record.correctCount, 0);
   const totalSeconds = records.reduce((sum, record) => sum + record.elapsedSeconds, 0);
@@ -27,9 +30,7 @@ export function LearningRecordList() {
   return <div className="space-y-4 px-5 py-5">
     <section className="rounded-card border border-border bg-surface p-5 shadow-[var(--checkon-shadow-card)]">
       <label className="flex items-center justify-between text-xs text-muted">학습 월
-        <select value={month} onChange={(event) => setMonth(event.target.value)} className="h-9 rounded-lg border border-border bg-surface px-3 text-sm font-semibold text-ink outline-none focus:border-action">
-          <option value="2026-08">2026년 8월</option><option value="2026-07">2026년 7월</option>
-        </select>
+        <select value={selectedMonth} onChange={(event) => setMonth(event.target.value)} className="h-9 rounded-lg border border-border bg-surface px-3 text-sm font-semibold text-ink outline-none focus:border-action">{months.map((item) => <option key={item} value={item}>{formatMonthLabel(item)}</option>)}</select>
       </label>
       <dl className="mt-4 grid grid-cols-3 text-center"><Metric label="정답률" value={`${accuracy}%`} /><Metric label="풀이 문항" value={`${totalQuestions}문항`} /><Metric label="학습 시간" value={`${Math.round(totalSeconds / 60)}분`} /></dl>
     </section>

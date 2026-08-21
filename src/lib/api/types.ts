@@ -1,5 +1,6 @@
 export type ApiEnvelope<T> = { data: T; meta?: Record<string, unknown> };
 export type ApiErrorPayload = { code?: string; message?: string; details?: unknown };
+export type ApiErrorEnvelope = { error: ApiErrorPayload; meta?: Record<string, unknown> };
 export type PageResponse<T> = { items: T[]; page: number; size: number; totalElements: number; totalPages: number };
 
 export type MutationStatus<T> =

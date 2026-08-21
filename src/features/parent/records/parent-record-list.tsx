@@ -5,24 +5,27 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { routeBuilders } from "@/config/routes";
 import { useParentRecordsQuery } from "@/features/parent/api/queries";
-import type { ParentRecord } from "@/features/parent/shared/mock-data";
+import type { ParentRecord } from "@/features/parent/model/types";
 import { useSelectedChild } from "@/features/parent/shared/parent.store";
+import { formatMonthLabel } from "@/lib/format/date";
 
 type Area = "전체" | ParentRecord["area"];
 const AREAS: Area[] = ["전체", "문학", "독서", "화법과작문", "언어·매체"];
 
 export function ParentRecordList() {
-  const [month, setMonth] = useState("2026-08");
+  const [month, setMonth] = useState("");
   const [area, setArea] = useState<Area>("전체");
   const child = useSelectedChild();
   const { data = [], isLoading, isError, refetch } = useParentRecordsQuery(child?.studentId ?? "");
-  const records = useMemo(() => data.filter((item) => item.month === month && (area === "전체" || item.area === area)), [data, area, month]);
+  const months = useMemo(() => [...new Set(data.map((item) => item.month))].sort().reverse(), [data]);
+  const selectedMonth = months.includes(month) ? month : months[0] ?? "";
+  const records = useMemo(() => data.filter((item) => item.month === selectedMonth && (area === "전체" || item.area === area)), [data, area, selectedMonth]);
   const questionCount = records.reduce((sum, item) => sum + item.questionCount, 0);
   const accuracy = records.length ? Math.round(records.reduce((sum, item) => sum + item.accuracy, 0) / records.length) : 0;
 
   return <div className="space-y-3 px-5 py-4">
     <section className="rounded-card border border-border bg-surface p-5 shadow-[var(--checkon-shadow-card)]">
-      <select aria-label="학습 월" value={month} onChange={(event) => setMonth(event.target.value)} className="h-9 rounded-lg bg-transparent pr-3 text-sm font-bold outline-none"><option value="2026-08">2026년 8월</option><option value="2026-07">2026년 7월</option></select>
+      <select aria-label="학습 월" value={selectedMonth} onChange={(event) => setMonth(event.target.value)} className="h-9 rounded-lg bg-transparent pr-3 text-sm font-bold outline-none">{months.map((item) => <option key={item} value={item}>{formatMonthLabel(item)}</option>)}</select>
       <dl className="mt-4 grid grid-cols-3 text-center"><Metric label="정답률" value={`${accuracy}%`} /><Metric label="풀이 문항" value={`${questionCount}문항`} /><Metric label="학습 횟수" value={`${records.length}회`} /></dl>
     </section>
     <div className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 py-1" aria-label="학습 영역 필터">{AREAS.map((item) => <button key={item} onClick={() => setArea(item)} aria-pressed={area === item} className={`h-9 shrink-0 rounded-full border px-3.5 text-xs font-semibold ${area === item ? "border-brand bg-brand text-[#4C3024]" : "border-border bg-surface text-muted"}`}>{item}</button>)}</div>

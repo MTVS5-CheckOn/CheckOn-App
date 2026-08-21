@@ -33,4 +33,6 @@ cp .env.example .env.local
 pnpm dev
 ```
 
+품질 검사는 `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm test:e2e` 순서로 실행합니다. 백엔드 연결 전에는 `.env.local`의 `NEXT_PUBLIC_DATA_SOURCE=mock`을 유지하고, 연결 시 `api`로만 전환합니다.
+
 학생 홈은 `/student`, 학부모 홈은 `/parent`에서 확인할 수 있습니다.

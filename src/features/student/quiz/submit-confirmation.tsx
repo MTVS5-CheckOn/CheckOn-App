@@ -10,6 +10,7 @@ import { useQuizQuery, useSubmitQuizMutation } from "@/features/student/quiz/que
 import { useQuizSessionStore } from "@/stores/quiz-session.store";
 import { useLearningRecordStore } from "@/features/student/records/learning-record.store";
 import type { RecordArea } from "@/features/student/records/types";
+import { getTodayLearningDate } from "@/lib/format/date";
 
 export function SubmitConfirmation({ worksheetId }: { worksheetId: string }) {
   const router = useRouter();
@@ -27,8 +28,9 @@ export function SubmitConfirmation({ worksheetId }: { worksheetId: string }) {
   if (isError || !worksheet) return <div className="p-8 text-center"><p className="text-sm font-bold">제출 정보를 불러오지 못했어요.</p><button onClick={() => refetch()} className="mt-4 rounded-xl bg-brand px-5 py-2 text-sm font-bold">다시 시도</button></div>;
   const finish = async () => {
     const correctCount = questions.filter((question) => answers[question.id] === question.correctAnswer).length;
+    const submittedAt = getTodayLearningDate();
     const record = {
-      id: `submitted-${worksheetId}`, worksheetId, title: worksheet.title, date: "2026.08.21", month: "2026-08", area: worksheet.area as RecordArea,
+      id: `submitted-${worksheetId}`, worksheetId, title: worksheet.title, date: submittedAt.date, month: submittedAt.month, area: worksheet.area as RecordArea,
       questionCount: questions.length, correctCount, elapsedSeconds: totalSeconds, weakness: correctCount === questions.length ? "복습 유지" : `${worksheet.area}·취약 유형`,
       weaknessDescription: correctCount === questions.length ? "모든 문항을 맞혔습니다. 정답 해설을 확인하며 풀이 근거를 유지해 보세요." : "오답 문항의 해설을 확인하고 같은 유형의 보완 문제를 추가로 풀어보세요.",
       trend: [{ label: "7/31", accuracy: 52 }, { label: "8/7", accuracy: 61 }, { label: "8/14", accuracy: 68 }, { label: "8/21", accuracy: Math.round(correctCount / questions.length * 100) }],
