@@ -16,7 +16,9 @@ const initialState = { worksheetId: null, currentIndex: 0, answers: {}, elapsedS
 
 export const useQuizSessionStore = create<QuizSessionState>()(persist((set) => ({
   ...initialState,
-  start: (worksheetId) => set({ worksheetId, currentIndex: 0, timerStatus: "running" }),
+  start: (worksheetId) => set((state) => state.worksheetId === worksheetId && state.timerStatus !== "submitted"
+    ? { timerStatus: "running" }
+    : { ...initialState, worksheetId, timerStatus: "running" }),
   moveTo: (currentIndex) => set({ currentIndex }),
   selectAnswer: (questionId, answer) => set((state) => ({ answers: { ...state.answers, [questionId]: answer } })),
   addElapsedSeconds: (questionId, seconds) => set((state) => ({ elapsedSecondsByQuestion: { ...state.elapsedSecondsByQuestion, [questionId]: (state.elapsedSecondsByQuestion[questionId] ?? 0) + seconds } })),

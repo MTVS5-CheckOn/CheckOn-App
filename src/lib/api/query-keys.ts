@@ -3,6 +3,8 @@ export const queryKeys = {
     all: ["student"] as const,
     home: () => [...queryKeys.student.all, "home"] as const,
     records: (month?: string) => [...queryKeys.student.all, "records", { month }] as const,
+    worksheets: () => [...queryKeys.student.all, "worksheets"] as const,
+    worksheet: (worksheetId: string) => [...queryKeys.student.worksheets(), worksheetId] as const,
   },
   parent: {
     all: ["parent"] as const,
