@@ -1,26 +1,62 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-pretendard);
+  --color-app: var(--checkon-bg-app);
+  --color-surface: var(--checkon-bg-surface);
+  --color-brand: var(--checkon-brand);
+  --color-brand-soft: var(--checkon-brand-soft);
+  --color-warning-soft: var(--checkon-warning-soft);
+  --color-info-soft: var(--checkon-info-soft);
+  --color-action: var(--checkon-action);
+  --color-ink: var(--checkon-text-primary);
+  --color-muted: var(--checkon-text-secondary);
+  --color-subtle: var(--checkon-text-tertiary);
+  --color-border: var(--checkon-border);
+  --color-divider: var(--checkon-divider);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-card: 18px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --checkon-bg-app: #f7f8fa;
+  --checkon-bg-surface: #ffffff;
+  --checkon-brand: #ffc7a2;
+  --checkon-brand-soft: #fffcec;
+  --checkon-warning-soft: #fff9d2;
+  --checkon-info-soft: #bfddf0;
+  --checkon-action: #4c75dd;
+  --checkon-text-primary: #202939;
+  --checkon-text-secondary: #667085;
+  --checkon-text-tertiary: #98a2b3;
+  --checkon-border: #e2e7ee;
+  --checkon-divider: #edf0f2;
+  --checkon-shadow-card: 0 2px 8px rgb(32 41 57 / 6%);
+  --checkon-appbar-height: 76px;
+  --checkon-bottom-nav-height: 64px;
+  --checkon-content-padding: 20px;
 }
 
+* { box-sizing: border-box; }
+html { background: #e8eaf0; }
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100dvh;
+  margin: 0;
+  background: var(--checkon-bg-app);
+  color: var(--checkon-text-primary);
+  font-family: var(--font-pretendard), Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  text-rendering: optimizeLegibility;
+}
+button, input, select, textarea { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+@media (min-width: 640px) { body { display: flex; justify-content: center; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
