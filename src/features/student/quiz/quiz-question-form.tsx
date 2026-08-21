@@ -6,15 +6,19 @@ import { ActionButton } from "@/components/ui/action-button";
 import { routeBuilders } from "@/config/routes";
 import { quizQuestionFixtures } from "@/features/student/quiz/mock-data";
 import { useQuizSessionStore } from "@/stores/quiz-session.store";
+import { useStudentQuestionStore } from "@/features/student/questions/question.store";
+import { worksheetFixtures } from "@/features/student/worksheets/mock-data";
 
 export function QuizQuestionForm({ worksheetId }: { worksheetId: string }) {
   const router = useRouter();
   const { currentIndex, pauseForQuestion, resume } = useQuizSessionStore();
   const [content, setContent] = useState("");
+  const addQuestion = useStudentQuestionStore((state) => state.addQuestion);
   const question = quizQuestionFixtures[currentIndex] ?? quizQuestionFixtures[0];
+  const worksheet = worksheetFixtures.find((item) => item.id === worksheetId) ?? worksheetFixtures[0];
 
   useEffect(() => { pauseForQuestion(); return () => resume(); }, [pauseForQuestion, resume]);
-  const submit = () => { if (content.trim().length < 5) return; router.push(routeBuilders.student.solveWorksheet(worksheetId)); };
+  const submit = () => { const value = content.trim(); if (value.length < 5) return; const id = addQuestion({ worksheetId, worksheetTitle: worksheet.title, questionNumber: currentIndex + 1, content: value }); router.push(routeBuilders.student.questionComplete(id, routeBuilders.student.solveWorksheet(worksheetId))); };
 
   return (
     <div className="px-5 py-5">

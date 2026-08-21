@@ -16,6 +16,14 @@ function resolveChrome(pathname: string): StudentChrome {
   if (worksheetId && pathname.endsWith("/results")) return { title: "채점 결과", action: { label: "학습기록", href: ROUTES.student.records }, bottomNavigation: false };
   if (worksheetId) return { title: "학습지 상세", backHref: ROUTES.student.worksheets, bottomNavigation: false };
   if (pathname === ROUTES.student.worksheets) return { title: "학습지 목록", bottomNavigation: true };
+  if (/^\/student\/records\/[^/]+$/.test(pathname)) return { title: "학습기록 상세", backHref: ROUTES.student.records, bottomNavigation: false };
+  if (pathname === ROUTES.student.records) return { title: "학습기록", bottomNavigation: true };
+  if (pathname === "/student/questions/new") return { title: "질문 작성", action: { label: "취소", href: ROUTES.student.questions }, bottomNavigation: false };
+  if (pathname === "/student/questions/complete") return { title: "질문 등록 완료", bottomNavigation: false };
+  if (/^\/student\/questions\/[^/]+$/.test(pathname)) return { title: "질문 상세", backHref: ROUTES.student.questions, bottomNavigation: true };
+  if (pathname === ROUTES.student.questions) return { title: "질문", action: { label: "질문하기", href: "/student/questions/new" }, bottomNavigation: true };
+  if (pathname === "/student/profile/invite") return { title: "초대 코드 등록", backHref: ROUTES.student.profile, bottomNavigation: false };
+  if (pathname === ROUTES.student.profile) return { title: "내 정보", bottomNavigation: true };
   return { title: "Check-On", bottomNavigation: true, notification: pathname === ROUTES.student.home };
 }
 

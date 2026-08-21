@@ -12,14 +12,14 @@ const FILTERS: { value: Filter; label: string }[] = [{ value: "all", label: "전
 
 export function WorksheetList() {
   const [filter, setFilter] = useState<Filter>("all");
-  const { data = [], isLoading } = useWorksheetsQuery();
+  const { data = [], isLoading, isError, refetch } = useWorksheetsQuery();
   const worksheets = useMemo(() => data.filter((worksheet) => filter === "all" || worksheet.status === filter || (filter === "in_progress" && worksheet.status === "new")), [data, filter]);
 
   return (
     <div className="px-5 py-5">
       <div className="mb-3 flex gap-2" role="group" aria-label="학습지 상태 필터">{FILTERS.map((item) => <button key={item.value} type="button" onClick={() => setFilter(item.value)} aria-pressed={filter === item.value} className={`h-[34px] rounded-full border px-4 text-[13px] font-semibold ${filter === item.value ? "border-brand bg-brand text-[#4C3024]" : "border-border bg-surface text-muted"}`}>{item.label}</button>)}</div>
       <section className="overflow-hidden rounded-card border border-border bg-surface shadow-[var(--checkon-shadow-card)]" aria-live="polite">
-        {isLoading ? <p className="p-5 text-sm text-muted">학습지를 불러오고 있어요.</p> : worksheets.length ? worksheets.map((worksheet) => <WorksheetRow key={worksheet.id} worksheet={worksheet} />) : <p className="p-8 text-center text-sm text-muted">해당 상태의 학습지가 없습니다.</p>}
+        {isLoading ? <div className="space-y-px" aria-label="학습지를 불러오는 중"><div className="h-[104px] animate-pulse bg-[#E9EDF2]" /><div className="h-[104px] animate-pulse bg-[#F1F3F6]" /></div> : isError ? <div className="p-8 text-center"><p className="text-sm font-bold">학습지를 불러오지 못했어요.</p><button onClick={() => refetch()} className="mt-3 h-10 rounded-xl bg-brand px-5 text-sm font-semibold">다시 시도</button></div> : worksheets.length ? worksheets.map((worksheet) => <WorksheetRow key={worksheet.id} worksheet={worksheet} />) : <p className="p-8 text-center text-sm text-muted">해당 상태의 학습지가 없습니다.</p>}
       </section>
     </div>
   );

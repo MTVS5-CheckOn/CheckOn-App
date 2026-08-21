@@ -11,12 +11,14 @@ import { SignupStepper } from "@/components/ui/signup-stepper";
 import { ROUTES } from "@/config/routes";
 import { studentSignupSchema, type StudentSignupValues } from "@/features/student/auth/schema";
 import { useStudentAuthStore } from "@/features/student/auth/student-auth.store";
+import { useSignupDraftStore } from "@/features/student/auth/signup-draft.store";
 
 const GRADES = ["고1", "고2", "고3", "N수생"] as const;
 
 export function SignupInfoForm() {
   const router = useRouter();
   const completeSignup = useStudentAuthStore((state) => state.completeSignup);
+  const clearSignupDraft = useSignupDraftStore((state) => state.clear);
   const [showPassword, setShowPassword] = useState(false);
   const { register, handleSubmit, control, setValue, setError, formState: { errors, isSubmitting } } = useForm<StudentSignupValues>({ mode: "onChange" });
   const values = useWatch({ control });
@@ -33,6 +35,7 @@ export function SignupInfoForm() {
       return;
     }
     completeSignup({ name: result.data.name, grade: result.data.grade });
+    clearSignupDraft();
     router.push(ROUTES.auth.studentSignupComplete);
   });
 

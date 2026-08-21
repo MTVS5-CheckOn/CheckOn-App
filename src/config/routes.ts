@@ -23,5 +23,10 @@ export const routeBuilders = {
     worksheetQuestion: (worksheetId: string) => `/student/worksheets/${worksheetId}/solve/question`,
     submitWorksheet: (worksheetId: string) => `/student/worksheets/${worksheetId}/submit`,
     worksheetResults: (worksheetId: string) => `/student/worksheets/${worksheetId}/results`,
+    record: (recordId: string) => `/student/records/${recordId}`,
+    question: (questionId: string) => `/student/questions/${questionId}`,
+    newQuestion: (worksheetId?: string) => worksheetId ? `/student/questions/new?worksheetId=${worksheetId}` : "/student/questions/new",
+    questionComplete: (questionId: string, returnTo?: string) => `/student/questions/complete?questionId=${questionId}${returnTo ? `&returnTo=${encodeURIComponent(returnTo)}` : ""}`,
+    inviteCode: () => "/student/profile/invite",
   },
 } as const;

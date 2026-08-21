@@ -1,0 +1,19 @@
+"use client";
+
+import { Bell, ChevronRight, LogOut, Plus, Settings } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+import { ROUTES, routeBuilders } from "@/config/routes";
+import { useStudentAuthStore } from "@/features/student/auth/student-auth.store";
+import { useStudentProfileStore } from "@/features/student/profile/profile.store";
+
+export function StudentProfile() {
+  const { name, grade, studentId, status, reset } = useStudentAuthStore();
+  const { teachers, notificationsEnabled, toggleNotifications } = useStudentProfileStore();
+  const [showAccount, setShowAccount] = useState(false);
+  return <div className="space-y-7 px-5 py-5">
+    <section className="flex items-center gap-4 rounded-card border border-border bg-surface p-5 shadow-[var(--checkon-shadow-card)]"><span className="grid size-14 shrink-0 place-items-center rounded-full bg-brand text-xl font-bold text-[#7D452C]">{name.slice(0,1)}</span><div className="min-w-0"><div className="flex items-center gap-2"><h2 className="text-lg font-bold">{name}</h2><span className={`rounded-md px-2 py-1 text-[11px] font-bold ${status === "active" ? "bg-[#E8F6F1] text-[#26856B]" : "bg-[#FFF9D2] text-[#92720A]"}`}>{status === "active" ? "활성" : "비활성"}</span></div><p className="mt-1 text-sm text-muted">{grade} · 학생 ID: {studentId}</p></div></section>
+    <section><h2 className="mb-2 text-xs font-semibold text-subtle">연결된 강사</h2><div className="overflow-hidden rounded-card border border-border bg-surface shadow-[var(--checkon-shadow-card)]">{teachers.length ? teachers.map((teacher) => <div key={teacher.id} className="flex min-h-[64px] items-center gap-3 border-b border-divider px-4 py-3"><span className="grid size-9 place-items-center rounded-full bg-[#EEF4FF] text-sm font-bold text-action">{teacher.name.slice(0,1)}</span><div><p className="text-sm font-semibold">{teacher.name}</p><p className="mt-0.5 text-xs text-subtle">{teacher.academy} · {teacher.subject}</p></div></div>) : <p className="p-5 text-sm text-muted">연결된 강사가 없습니다.</p>}<Link href={routeBuilders.student.inviteCode()} className="flex min-h-[60px] items-center gap-3 px-4 text-sm font-semibold text-action"><span className="grid size-9 place-items-center rounded-full border border-border bg-app"><Plus size={18} /></span>초대 코드 등록하기</Link></div></section>
+    <section><h2 className="mb-2 text-xs font-semibold text-subtle">계정 설정</h2><div className="overflow-hidden rounded-card border border-border bg-surface shadow-[var(--checkon-shadow-card)]"><button onClick={toggleNotifications} className="flex min-h-[54px] w-full items-center gap-3 border-b border-divider px-4 text-left"><Bell size={18} className="text-muted" /><span className="flex-1 text-sm">알림 설정</span><span role="switch" aria-checked={notificationsEnabled} className={`relative h-7 w-12 rounded-full transition-colors ${notificationsEnabled ? "bg-action" : "bg-[#D8DEE7]"}`}><span className={`absolute top-1 size-5 rounded-full bg-white shadow transition-transform ${notificationsEnabled ? "translate-x-6" : "translate-x-1"}`} /></span></button><button onClick={() => setShowAccount((value) => !value)} aria-expanded={showAccount} className="flex min-h-[54px] w-full items-center gap-3 border-b border-divider px-4 text-left"><Settings size={18} className="text-muted" /><span className="flex-1 text-sm">계정 설정</span><ChevronRight size={18} className={`text-subtle transition-transform ${showAccount ? "rotate-90" : ""}`} /></button>{showAccount ? <div className="border-b border-divider bg-[#FAFBFC] px-4 py-3 text-xs leading-5 text-muted">이름과 학년 변경은 연결된 학원의 확인 후 반영됩니다.<br />비밀번호 변경 기능은 백엔드 계정 API와 연결될 예정입니다.</div> : null}<Link href={ROUTES.auth.studentLogin} onClick={reset} className="flex min-h-[54px] items-center gap-3 px-4 text-sm text-[#E85A4F]"><LogOut size={18} />로그아웃</Link></div></section>
+  </div>;
+}

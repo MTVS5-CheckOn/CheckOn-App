@@ -7,11 +7,15 @@ import { routeBuilders } from "@/config/routes";
 import { formatElapsed } from "@/features/student/quiz/format-time";
 import { quizQuestionFixtures } from "@/features/student/quiz/mock-data";
 import { useQuizSessionStore } from "@/stores/quiz-session.store";
+import { worksheetFixtures } from "@/features/student/worksheets/mock-data";
 
 export function QuizSolver({ worksheetId }: { worksheetId: string }) {
   const router = useRouter();
   const { currentIndex, answers, elapsedSecondsByQuestion, timerStatus, start, moveTo, selectAnswer, addElapsedSeconds, pauseForQuestion } = useQuizSessionStore();
-  const question = quizQuestionFixtures[currentIndex] ?? quizQuestionFixtures[0];
+  const worksheet = worksheetFixtures.find((item) => item.id === worksheetId) ?? worksheetFixtures[0];
+  const questions = quizQuestionFixtures.slice(0, Math.min(worksheet.questionCount, quizQuestionFixtures.length));
+  const safeIndex = Math.min(currentIndex, questions.length - 1);
+  const question = questions[safeIndex] ?? questions[0];
   const selectedAnswer = answers[question.id];
 
   useEffect(() => { start(worksheetId); }, [start, worksheetId]);
@@ -24,13 +28,13 @@ export function QuizSolver({ worksheetId }: { worksheetId: string }) {
   }, [addElapsedSeconds, question.id, timerStatus]);
 
   const goQuestion = () => { pauseForQuestion(); router.push(routeBuilders.student.worksheetQuestion(worksheetId)); };
-  const goNext = () => currentIndex === quizQuestionFixtures.length - 1 ? router.push(routeBuilders.student.submitWorksheet(worksheetId)) : moveTo(currentIndex + 1);
+  const goNext = () => safeIndex === questions.length - 1 ? router.push(routeBuilders.student.submitWorksheet(worksheetId)) : moveTo(safeIndex + 1);
 
   return (
     <div className="flex min-h-[calc(100dvh-76px)] flex-col">
       <div className="border-b border-divider bg-surface">
-        <div className="flex h-[52px] items-center justify-between px-5 text-sm font-bold"><span className="text-action">{currentIndex + 1} / {quizQuestionFixtures.length}</span><time className="text-lg text-[#D96534]">{formatElapsed(elapsedSecondsByQuestion[question.id] ?? 0)}</time></div>
-        <div className="h-1 bg-[#E8EBEF]"><span className="block h-full bg-brand" style={{ width: `${((currentIndex + 1) / quizQuestionFixtures.length) * 100}%` }} /></div>
+        <div className="flex h-[52px] items-center justify-between px-5 text-sm font-bold"><span className="text-action">{safeIndex + 1} / {questions.length}</span><time className="text-lg text-[#D96534]">{formatElapsed(elapsedSecondsByQuestion[question.id] ?? 0)}</time></div>
+        <div className="h-1 bg-[#E8EBEF]"><span className="block h-full bg-brand transition-[width]" style={{ width: `${((safeIndex + 1) / questions.length) * 100}%` }} /></div>
       </div>
       <main className="flex-1 space-y-3 px-5 py-5">
         {question.passage ? <section className="whitespace-pre-line rounded-card border border-border bg-surface p-4 text-sm leading-7 text-muted">{question.passage}</section> : null}
@@ -39,7 +43,7 @@ export function QuizSolver({ worksheetId }: { worksheetId: string }) {
       </main>
       <div className="sticky bottom-0 space-y-2 border-t border-divider bg-surface px-5 pb-[calc(16px+env(safe-area-inset-bottom))] pt-3">
         <ActionButton variant="ghost" onClick={goQuestion}>이 문제 질문</ActionButton>
-        <div className="grid grid-cols-2 gap-2"><ActionButton variant="ghost" disabled={currentIndex === 0} onClick={() => moveTo(currentIndex - 1)}>이전 문제</ActionButton><ActionButton onClick={goNext}>{currentIndex === quizQuestionFixtures.length - 1 ? "답안 제출" : "다음 문제"}</ActionButton></div>
+        <div className="grid grid-cols-2 gap-2"><ActionButton variant="ghost" disabled={safeIndex === 0} onClick={() => moveTo(safeIndex - 1)}>이전 문제</ActionButton><ActionButton onClick={goNext}>{safeIndex === questions.length - 1 ? "답안 제출" : "다음 문제"}</ActionButton></div>
       </div>
     </div>
   );

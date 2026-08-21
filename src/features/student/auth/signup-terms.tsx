@@ -2,14 +2,13 @@
 
 import { Check } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { AuthAppBar } from "@/components/layout/auth-app-bar";
 import { ActionButton } from "@/components/ui/action-button";
 import { SignupStepper } from "@/components/ui/signup-stepper";
 import { ROUTES } from "@/config/routes";
+import { type SignupTermKey, useSignupDraftStore } from "@/features/student/auth/signup-draft.store";
 
-type TermKey = "service" | "privacy" | "notification";
-const TERMS: { key: TermKey; label: string; required: boolean }[] = [
+const TERMS: { key: SignupTermKey; label: string; required: boolean }[] = [
   { key: "service", label: "[필수] 서비스 이용약관", required: true },
   { key: "privacy", label: "[필수] 개인정보 수집·이용 동의", required: true },
   { key: "notification", label: "[선택] 학습 알림 수신 동의", required: false },
@@ -17,10 +16,12 @@ const TERMS: { key: TermKey; label: string; required: boolean }[] = [
 
 export function SignupTerms() {
   const router = useRouter();
-  const [checked, setChecked] = useState<Record<TermKey, boolean>>({ service: false, privacy: false, notification: false });
+  const checked = useSignupDraftStore((state) => state.terms);
+  const setTerm = useSignupDraftStore((state) => state.setTerm);
+  const setAllTerms = useSignupDraftStore((state) => state.setAllTerms);
   const requiredChecked = checked.service && checked.privacy;
   const allChecked = Object.values(checked).every(Boolean);
-  const setAll = () => setChecked({ service: !allChecked, privacy: !allChecked, notification: !allChecked });
+  const setAll = () => setAllTerms(!allChecked);
 
   return (
     <div className="flex min-h-dvh flex-col bg-app">
@@ -29,8 +30,8 @@ export function SignupTerms() {
       <main className="flex-1 px-5 py-4">
         <section className="rounded-card border border-border bg-surface px-4 shadow-[var(--checkon-shadow-card)]">
           <h2 className="py-4 text-base font-bold">서비스 이용 동의</h2>
-          <TermRow checked={requiredChecked} label="필수 약관에 모두 동의합니다" onChange={() => setChecked((value) => ({ ...value, service: !requiredChecked, privacy: !requiredChecked }))} />
-          {TERMS.map((term) => <TermRow key={term.key} checked={checked[term.key]} label={term.label} onChange={() => setChecked((value) => ({ ...value, [term.key]: !value[term.key] }))} />)}
+          <TermRow checked={requiredChecked} label="필수 약관에 모두 동의합니다" onChange={() => { setTerm("service", !requiredChecked); setTerm("privacy", !requiredChecked); }} />
+          {TERMS.map((term) => <TermRow key={term.key} checked={checked[term.key]} label={term.label} onChange={() => setTerm(term.key, !checked[term.key])} />)}
           <button type="button" onClick={setAll} className="mb-4 text-xs text-action">{allChecked ? "전체 동의 해제" : "선택 항목까지 전체 동의"}</button>
         </section>
       </main>

@@ -7,6 +7,6 @@ export interface WorksheetGateway {
 }
 
 export const mockWorksheetGateway: WorksheetGateway = {
-  async list() { return worksheetFixtures; },
-  async get(worksheetId) { return worksheetFixtures.find((worksheet) => worksheet.id === worksheetId) ?? null; },
+  async list() { await new Promise((resolve) => setTimeout(resolve, 180)); return worksheetFixtures; },
+  async get(worksheetId) { await new Promise((resolve) => setTimeout(resolve, 180)); return worksheetFixtures.find((worksheet) => worksheet.id === worksheetId) ?? null; },
 };
