@@ -1,0 +1,40 @@
+"use client";
+
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+
+export type ParentChild = { id: string; studentId: string; name: string; grade: string; active: boolean };
+export type ParentTeacher = { id: string; name: string; academy: string };
+
+type ParentState = {
+  children: ParentChild[];
+  selectedChildId: string | null;
+  teachers: ParentTeacher[];
+  notificationsEnabled: boolean;
+  selectChild: (id: string) => void;
+  addChild: (child: ParentChild) => void;
+  addTeacher: (teacher: ParentTeacher) => void;
+  toggleNotifications: () => void;
+};
+
+const DEFAULT_CHILD: ParentChild = { id: "student-1", studentId: "STU-A41C", name: "김민준", grade: "고2", active: true };
+const DEFAULT_TEACHER: ParentTeacher = { id: "teacher-1", name: "박지은 선생님", academy: "한울국어학원" };
+
+export const useParentStore = create<ParentState>()(persist((set) => ({
+  children: [DEFAULT_CHILD],
+  selectedChildId: DEFAULT_CHILD.id,
+  teachers: [DEFAULT_TEACHER],
+  notificationsEnabled: true,
+  selectChild: (id) => set({ selectedChildId: id }),
+  addChild: (child) => set((state) => state.children.some((item) => item.studentId === child.studentId)
+    ? state
+    : { children: [...state.children, child], selectedChildId: child.id }),
+  addTeacher: (teacher) => set((state) => state.teachers.some((item) => item.id === teacher.id)
+    ? state
+    : { teachers: [...state.teachers, teacher] }),
+  toggleNotifications: () => set((state) => ({ notificationsEnabled: !state.notificationsEnabled })),
+}), { name: "checkon-parent-profile" }));
+
+export function useSelectedChild() {
+  return useParentStore((state) => state.children.find((child) => child.id === state.selectedChildId) ?? state.children[0]);
+}

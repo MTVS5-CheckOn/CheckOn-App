@@ -1,0 +1,39 @@
+"use client";
+
+import { CheckCircle2, ChevronLeft, ChevronRight, Download, FileText, Info, Share2 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
+import { routeBuilders } from "@/config/routes";
+import { parentReports } from "@/features/parent/shared/mock-data";
+
+export function ParentReportList() {
+  const [year, setYear] = useState(2026);
+  const reports = parentReports.filter((item) => item.year === year);
+  return <div className="px-5 py-4"><select aria-label="보고서 연도" value={year} onChange={(event) => setYear(Number(event.target.value))} className="mb-4 h-10 rounded-lg bg-transparent text-base font-bold outline-none"><option value={2026}>2026년</option><option value={2025}>2025년</option></select>{reports.length ? <section className="overflow-hidden rounded-card border border-border bg-surface">{reports.map((report) => <Link key={report.id} href={routeBuilders.parent.report(report.id)} className={`flex min-h-[76px] items-center gap-3 border-b border-divider px-4 py-3 last:border-0 ${report.isNew ? "bg-[#FFFDF0]" : ""}`}><div className="min-w-0 flex-1"><div className="flex items-center gap-2">{report.isNew ? <span className="rounded-md bg-brand px-2 py-1 text-[11px] font-bold text-[#7D452C]">NEW</span> : null}<h2 className="font-bold">{report.year}년 {report.month}월</h2></div><p className="mt-1 text-xs text-subtle">{report.teacher} · {report.pages}페이지 · {report.issuedAt} 발행</p></div>{!report.isNew ? <span className="text-xs text-subtle">확인</span> : null}<ChevronRight size={17} className="text-subtle" /></Link>)}</section> : <EmptyReport />}</div>;
+}
+
+export function ParentReportDetail({ reportId }: { reportId: string }) {
+  const report = parentReports.find((item) => item.id === reportId);
+  const [shared, setShared] = useState(false);
+  if (!report) return <div className="p-8 text-center text-sm text-muted">보고서를 찾을 수 없습니다.</div>;
+  async function share() {
+    const data = { title: `Check-On ${report!.year}년 ${report!.month}월 보고서`, text: "김민준 학생의 월별 학습 보고서입니다.", url: window.location.href };
+    try { if (navigator.share) await navigator.share(data); else await navigator.clipboard.writeText(window.location.href); setShared(true); } catch { return; }
+  }
+  return <div className="flex min-h-[calc(100dvh-76px)] flex-col"><div className="space-y-4 p-5"><div className="flex justify-end"><button onClick={share} className="flex h-10 items-center gap-2 rounded-xl border border-border bg-surface px-3 text-sm font-semibold text-action"><Share2 size={17} />공유</button></div>{shared ? <div className="flex items-center gap-2 rounded-xl bg-[#E8F6F1] p-3 text-sm font-semibold text-[#26856B]"><CheckCircle2 size={18} />보고서 링크를 공유했습니다.</div> : null}<section className="rounded-card border border-border bg-surface p-5"><dl className="space-y-3 text-sm"><Row label="보고서" value={`${report.year}년 ${report.month}월`} /><Row label="자녀명" value="김민준" /><Row label="담당 강사" value={report.teacher} /><Row label="발행일" value={report.issuedAt} /><Row label="학습 기간" value="2026.08.01 ~ 08.18" /><Row label="페이지 수" value={`${report.pages}페이지`} /></dl></section><section className="rounded-card border border-border bg-surface p-5"><h2 className="text-sm font-bold text-muted">이번 달 핵심</h2><dl className="mt-4 grid grid-cols-3 text-center"><Summary value="68%" label="정답률" /><Summary value="71위" label="전국 백분위" action /><Summary value="독서" label="우선 보완" danger /></dl><p className="mt-4 text-center text-[11px] text-subtle">전국 동일 학년 표본 · 2026.08.31 기준</p></section><div className="flex gap-2 rounded-xl border border-[#A9D4F2] bg-[#EEF7FF] p-3 text-xs leading-5 text-muted"><Info size={17} className="mt-0.5 shrink-0 text-action" />강사가 검토·승인·발행한 확정 보고서입니다.</div></div><div className="sticky bottom-0 mt-auto border-t border-divider bg-surface p-5"><Link href={routeBuilders.parent.reportPdf(report.id)} className="flex h-[52px] items-center justify-center rounded-xl bg-brand text-sm font-bold text-[#4C3024]">PDF 보고서 보기</Link></div></div>;
+}
+
+const PAGE_LABELS = ["표지", "월간 분석", "선생님 의견", "주간 분석", "영역·유형별 성과", "진단 결과", "영역별 성취도"];
+const PDF_URL = "/reports/CheckOn-parent-report-2026-08.pdf";
+
+export function ParentPdfViewer() {
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  function move(next: number) { setLoading(true); setPage(next); }
+  return <div className="flex min-h-[calc(100dvh-76px)] flex-col bg-[#1F2937]"><div className="flex h-10 items-center justify-between bg-app px-5 text-sm font-bold"><span>페이지 {page} / 7</span><a href={PDF_URL} download className="grid size-9 place-items-center" aria-label="PDF 다운로드"><Download size={19} /></a></div><div className="relative flex min-h-[470px] flex-1 items-center justify-center p-4">{loading ? <div className="absolute inset-0 z-10 grid place-items-center"><span className="size-8 animate-spin rounded-full border-4 border-white/25 border-t-brand" aria-label="PDF 로딩 중" /></div> : null}<Image key={page} src={`/reports/pages/report-${page}.png`} alt={`PDF 보고서 ${page}페이지`} width={910} height={1287} priority={page === 1} onLoad={() => setLoading(false)} className="max-h-[570px] w-auto max-w-full bg-white object-contain shadow-lg" /></div><div className="bg-surface"><div className="no-scrollbar flex gap-2 overflow-x-auto px-3 py-3">{PAGE_LABELS.map((label, index) => <button key={label} onClick={() => move(index + 1)} aria-pressed={page === index + 1} className={`flex w-[72px] shrink-0 flex-col items-center gap-1 rounded-lg border p-2 ${page === index + 1 ? "border-brand bg-brand-soft" : "border-border"}`}><FileText size={22} className={page === index + 1 ? "text-[#D96534]" : "text-subtle"} /><span className="line-clamp-2 text-[10px] leading-3">{label}</span></button>)}</div><div className="flex h-12 items-center justify-between border-t border-divider px-4"><button disabled={page === 1} onClick={() => move(page - 1)} className="flex items-center text-sm disabled:text-subtle"><ChevronLeft size={18} />이전</button><span className="text-sm text-muted">{page} / 7</span><button disabled={page === 7} onClick={() => move(page + 1)} className="flex items-center text-sm disabled:text-subtle">다음<ChevronRight size={18} /></button></div></div></div>;
+}
+
+function EmptyReport() { return <section className="rounded-card border border-border bg-surface px-5 py-12 text-center"><FileText className="mx-auto text-subtle" /><p className="mt-3 text-sm font-bold">발행된 월별 보고서가 없어요</p><p className="mt-1 text-xs text-muted">강사가 보고서를 발행하면 이곳에서 확인할 수 있습니다.</p></section>; }
+function Row({ label, value }: { label: string; value: string }) { return <div className="flex gap-3"><dt className="text-muted">{label}</dt><dd className="ml-auto text-right font-semibold">{value}</dd></div>; }
+function Summary({ value, label, action, danger }: { value: string; label: string; action?: boolean; danger?: boolean }) { return <div><dd className={`text-2xl font-bold ${action ? "text-action" : danger ? "text-[#E85A4F]" : ""}`}>{value}</dd><dt className="mt-1 text-xs text-muted">{label}</dt></div>; }
