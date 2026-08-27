@@ -110,8 +110,8 @@ async function httpGateway() {
   vi.stubEnv("NEXT_PUBLIC_API_BASE_URL", BASE);
   vi.stubEnv("NEXT_PUBLIC_API_RESPONSE_MODE", "wrapped");
   vi.resetModules();
-  const module = await import("@/features/student/quiz/api");
-  return module.httpQuizGateway;
+  const loaded = await import("@/features/student/quiz/api");
+  return loaded.httpQuizGateway;
 }
 
 // 🔴 같은 suite 를 mock 과 HTTP 양쪽에서 돌린다.

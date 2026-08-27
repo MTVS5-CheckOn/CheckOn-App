@@ -30,7 +30,8 @@ describe("🔴 zod 런타임 검증 — 계약과 다르면 거기서 터진다"
   });
 
   it("🔴 correctCount 가 빠지면 조용히 undefined 로 흐르지 않고 502 로 터진다", async () => {
-    const { correctCount: _dropped, ...missing } = VALID_RESULT;
+    const missing: Record<string, unknown> = { ...VALID_RESULT };
+    delete missing.correctCount;
     server.use(http.get(`${BASE}/member/students/me/attempts/a1/result`, () => HttpResponse.json({ data: missing })));
     await expect((await gateway()).getResult("a1")).rejects.toMatchObject({ status: 502, code: "INVALID_API_RESPONSE" });
   });
