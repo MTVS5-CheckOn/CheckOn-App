@@ -21,7 +21,7 @@ export function ActivationPending() {
   const router = useRouter();
   const { studentId, activateForPreview, reset } = useStudentAuthStore();
   const activationQuery = useStudentActivationQuery();
-  useEffect(() => { if (activationQuery.data?.accountStatus === "active") router.replace(ROUTES.auth.studentActivationComplete); }, [activationQuery.data?.accountStatus, router]);
+  useEffect(() => { if (activationQuery.data?.status === "ACTIVE") router.replace(ROUTES.auth.studentActivationComplete); }, [activationQuery.data?.status, router]);
   const logout = () => { reset(); router.push(ROUTES.auth.studentLogin); };
   return (
     <div className="min-h-dvh bg-app">
@@ -31,7 +31,7 @@ export function ActivationPending() {
           <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#EEF4FF] text-action"><Clock3 size={25} /></span>
           <div><h2 className="font-bold">계정 활성화 대기 중</h2><p className="mt-1 text-sm text-muted">학부모님의 자녀 등록을 기다리고 있어요.</p></div>
         </section>
-        <StudentIdCard studentId={activationQuery.data?.studentId ?? studentId} />
+        <StudentIdCard studentId={activationQuery.data?.studentPublicId ?? studentId} />
         <section className="rounded-card border border-border bg-surface p-5 shadow-[var(--checkon-shadow-card)]">
           <h2 className="mb-4 font-bold">자녀 등록 방법</h2>
           <ol className="space-y-4">{STEPS.map((step, index) => <li key={step} className="flex gap-3 text-sm leading-6"><span className="grid size-7 shrink-0 place-items-center rounded-full bg-brand text-xs font-bold">{index + 1}</span><span>{step}</span></li>)}</ol>

@@ -12,6 +12,7 @@ import { ROUTES } from "@/config/routes";
 import { studentLoginSchema, type StudentLoginValues } from "@/features/student/auth/schema";
 import { useStudentAuthStore } from "@/features/student/auth/student-auth.store";
 import { useLoginMutation } from "@/features/auth/mutations";
+import { authGateway } from "@/features/auth/api";
 
 export function StudentLoginForm() {
   const router = useRouter();
@@ -29,7 +30,14 @@ export function StudentLoginForm() {
       });
       return;
     }
-    try { const session = await loginMutation.mutateAsync({ role: "student", loginId: result.data.studentId, password: result.data.password }); router.push(session.accountStatus === "active" && status === "active" ? ROUTES.student.home : ROUTES.auth.studentActivationPending); } catch { setError("root", { message: "로그인에 실패했습니다. 입력 정보를 확인해 주세요." }); }
+    try {
+      // 🔴 공개 학생 ID(STU-B52D9K)로 로그인한다 — MB-01 CONFIRMED. 서버가 정규화한다.
+      await loginMutation.mutateAsync({ role: "student", studentPublicId: result.data.studentId, password: result.data.password });
+      // 로그인 응답에는 활성화 상태가 없다(MemberAuthResult). 별도로 확인한다.
+      const activation = await authGateway.getStudentActivationStatus().catch(() => null);
+      const active = activation ? activation.status === "ACTIVE" : status === "active";
+      router.push(active ? ROUTES.student.home : ROUTES.auth.studentActivationPending);
+    } catch { setError("root", { message: "로그인에 실패했습니다. 입력 정보를 확인해 주세요." }); }
   });
 
   return (
