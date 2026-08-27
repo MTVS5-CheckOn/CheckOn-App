@@ -158,6 +158,51 @@ WORKSHEET_NOT_GRADABLE · RATE_LIMITED · INTERNAL · DEPENDENCY_UNAVAILABLE · 
 | `REPORT_NOT_READY` | ❌ 없다 | `RESOURCE_NOT_FOUND` |
 | `PDF_NOT_FOUND` | ❌ 없다 | `RESOURCE_NOT_FOUND` |
 
+## 🔴 계약에 원천이 없어 미표시 (2026-08-27)
+
+화면이 백엔드가 약속한 적 없는 데이터로 설계돼 있었다. 아래 값은 **계약에 원천이 없어 화면에서 감췄다.**
+
+감추는 방식 — 🔴 **지우지 않고 감춘다.**
+- 타입·adapter 에서 필드를 **삭제하지 않았다.** 백엔드가 낼지 정해지면 되살려야 한다.
+- 🔴 **빈 칸을 만들지 않았다.** 「─」·「0」·「정보 없음」을 채우면 그게 곧 지어낸 값이다. 값이 없으면 그 항목 자체를 렌더링하지 않는다.
+- 항목이 전부 빠져 섹션이 비면 **섹션째 감췄다.** 제목만 남은 빈 카드를 두지 않는다.
+- 🔴 **계산해서 만들지 않았다.** `itemIds` 로 오답 수를 셀 수 있어도 세지 않는다 — 서버가 나중에 같은 값을 내면 두 값이 갈린다.
+- 감춘 자리마다 주석으로 왜 감췄는지 + 계약 어디에 없는지 적었다.
+
+| 화면 | 필드 | 판정 필요 |
+| --- | --- | --- |
+| 분석 | `baselineAccuracy` · `comparisonMonth` · `reviewQuestionCount` · `repeatedMistakeCount` · `weeklySummary` · `difficultyDistribution` · `misconceptionSummary` | 백엔드가 낼 것인가, 화면에서 영구히 뺄 것인가 |
+| 약점 상세 | `description` · `studyFrequency` · `averageTime` · `misconception` · `linkedWeaknesses` · `nextAction` — 「왜 이 영역이 약점인가요?」·「함께 막힌 유형」·「다음 학습 제안」 세 섹션 통째 | 〃 (`WeaknessCell` 에 전부 없다) |
+| 보고서 | `studyPeriod` · `teacherComment` · `summary.*`(정답률·약점개선도·우선보완·비교월·채점문항·반복실수) | 〃 |
+| 학습기록 상세 | `reviewCount` · `repeatedMistakeCount` · `insight` · `skillResults` · `wrongTypeSummary` · `overtimeQuestionSummary` · `baselineAccuracy` | 〃 |
+| 내 정보 | `maskedPhone` | 〃 (`ParentProfile` 에 전화번호 필드 자체가 없다) |
+
+### 🔴 `summary.*` 는 `sections[].data` 로도 만들 수 없다
+
+```yaml
+# member-api.yaml:2276-2279  ReportDetail.sections[].data
+data: { type: object, nullable: true, description: 차트용 원시 값 }
+```
+
+**자유형 object 라 계약이 안쪽 키를 하나도 약속하지 않는다.** 게다가 W1 발행 배치가
+그 값(`content` 컬럼)을 **항상 `null` 로** 넣는다. 계약상으로도 실제로도 원천이 아니다.
+
+### ✅ `studentName` 은 예외 — 감추지 않는다
+
+보고서 화면은 `studentId` 로 라우팅되니 이미 어느 자녀인지 안다.
+자녀 목록·홈에서 이미 가진 이름을 **화면 상태에서 쓴다. API 를 새로 부르지 않는다.**
+
+### 🔴 계약과 실제 응답이 다른 지점 (판정 필요)
+
+실제 백엔드(dev `1dfdc69`) 시연 시드로 확인했다. 어느 쪽도 임의로 고치지 않았다.
+
+| 지점 | 계약 | 실제 | 프론트 처리 |
+| --- | --- | --- | --- |
+| `Child.name` | `required` | 자녀 4명 중 2명이 `null` | null 허용. 이름 줄을 렌더링하지 않는다. **required 로 두면 내 정보 화면 전체가 502 로 죽는다** |
+| `LearningRecordDetail.items` · `weakness` | 둘 다 `required` | `itemIds`(id 배열) · `weaknessStatus`(문자열)로 온다 | 양쪽 다 받아들이고, 문항별 결과·약점 섹션은 값이 올 때만 그린다 |
+| `ParentAnalysis.calculatedAt` | `nullable` 표기 없음 | `null` 로 온다 | `required` 에 없는 필드는 전부 `.nullish()` 로 받는다 |
+| `POST .../consultations/{id}/cancellation` | 경로 있음 | **미매핑.** 401 + `{"code":"UNAUTHORIZED"}` (member 봉투 아님) | `consultationCancellationSupported=false` 로 **호출하지 않는다.** MB-09 확정 시 백엔드와 함께 처리 — 지금 우회하지 않는다 |
+
 ## 🔴 비어 있는 게 정상인 화면
 
 아래 넷은 버그가 아니라 계약이 허용하는 정상 상태다. 빈 상태 화면을 그리는 것이 산출물이다.
