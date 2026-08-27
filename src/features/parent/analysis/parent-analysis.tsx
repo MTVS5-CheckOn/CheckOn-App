@@ -73,7 +73,26 @@ export function ParentAnalysis() {
       {data.weaknessRanking.length > 0 ? (
       <section className="rounded-card border border-border bg-surface p-4">
         <h2 className="text-sm font-bold">먼저 보완할 순서</h2>
-        <div className="mt-3 divide-y divide-divider">{data.weaknessRanking.map((item) => <div key={`${item.area}-${item.skill}`} className="flex items-center gap-3 py-3"><span className={`grid size-7 shrink-0 place-items-center rounded-full text-xs font-bold ${item.status === "confirmed" ? "bg-[#FFF0EA] text-[#C9572B]" : "bg-[#F0F2F5] text-muted"}`}>{item.rank}</span><div className="min-w-0 flex-1"><p className="text-sm font-semibold">{item.area} · {item.skill}</p><p className="mt-0.5 text-[11px] text-subtle">{item.questionCount}문항 · 자기 기준보다 {Math.abs(item.gapFromBaseline)}%p 낮음</p></div><div className="text-right"><strong>{item.accuracy}%</strong><p className={`text-[10px] font-semibold ${item.status === "confirmed" ? "text-[#C9572B]" : "text-subtle"}`}>{item.status === "confirmed" ? "약점 확정" : "더 확인"}</p></div></div>)}</div>
+        <div className="mt-3 divide-y divide-divider">{data.weaknessRanking.map((item) => {
+          // 🔴 표본이 최소치에 못 미치면 「판단 보류」다. 화면이 이미 그렇게 약속했고,
+          //    그 최소치는 응답의 improvement.minimumSampleSize 에 있다.
+          const pending = item.minimumSampleSize != null && item.questionCount < item.minimumSampleSize;
+          return <div key={`${item.area}-${item.skill}`} className="flex items-center gap-3 py-3">
+            <span className="grid size-7 shrink-0 place-items-center rounded-full bg-[#F0F2F5] text-xs font-bold text-muted">{item.rank}</span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold">{item.area} · {item.skill}</p>
+              {/* 🔴 accuracyDeltaPp 는 전월 대비이고 양수면 개선이다. 방향을 그대로 말하고,
+                  값을 낼 수 없으면(표본 부족 등) 아예 표시하지 않는다 — 0%p 로 채우지 않는다. */}
+              <p className="mt-0.5 text-[11px] text-subtle">
+                {item.questionCount}문항{item.accuracyDeltaPp != null ? ` · 지난달보다 ${Math.abs(item.accuracyDeltaPp)}%p ${item.accuracyDeltaPp >= 0 ? "높음" : "낮음"}` : ""}
+              </p>
+            </div>
+            <div className="text-right">
+              <strong>{item.accuracy}%</strong>
+              {pending ? <p className="text-[10px] font-semibold text-subtle">판단 보류</p> : null}
+            </div>
+          </div>;
+        })}</div>
       </section>
       ) : null}
 
@@ -93,7 +112,21 @@ export function WeaknessDetail({ area }: { area: string }) {
   if (isError || !data) return <ErrorState onRetry={() => refetch()} />;
 
   const { areaScores, primaryWeakness, analysisAsOf } = data;
-  const score = areaScores.find((item) => item.area === area)?.score ?? primaryWeakness.score;
+  /**
+   * 🔴 계약의 `areaScores` 가 이 화면의 원천이지만 백엔드가 **키 자체를 보내지 않는다**
+   * (실측: analysis 응답 최상위 키에 areaScores·accuracyTrend 가 없다).
+   * 그래서 고급 분석이 이미 받은 `weaknessRanking` 으로 그린다 — **새 요청은 없다.**
+   * 🔴 영역별로 평균을 내지 않는다. 한 영역에 유형이 둘 이상 오고(독서·사실 / 독서·비판)
+   *    그걸 합치면 서버가 주지 않은 값을 만들어내는 것이다. 서버가 준 셀을 그대로 막대로 둔다.
+   * areaScores 가 채워지면 그쪽이 계약이 의도한 원천이므로 그것을 먼저 쓴다.
+   */
+  const chartCells = areaScores.length
+    ? areaScores.map((item) => ({ label: item.area, score: item.score, area: item.area }))
+    : data.weaknessRanking.map((item) => ({ label: `${item.area}·${item.skill}`, score: item.accuracy, area: item.area }));
+  // 🔴 이 영역의 점수는 서버가 준 값만 쓴다. 여러 유형을 평균 내지 않는다.
+  const areaScore = areaScores.find((item) => item.area === area)?.score
+    ?? (area === primaryWeakness.area ? primaryWeakness.score : null);
+  const score = areaScore ?? 0;
   const isPrimary = area === primaryWeakness.area;
   const skill = isPrimary ? primaryWeakness.skill : "영역 종합";
 
@@ -108,7 +141,11 @@ export function WeaknessDetail({ area }: { area: string }) {
 
       {isPrimary ? <section className="rounded-card border border-[#B9D8EF] bg-[#F2F9FE] p-4"><div className="flex items-center gap-3"><span className="grid size-9 place-items-center rounded-full bg-[#BFDDF0] text-[#2F6FA7]"><Sparkles size={18} /></span><div><p className="text-xs text-muted">지난달 대비 개선</p><p className="mt-0.5 text-sm font-bold">{primaryWeakness.previousMonthScore}% → {primaryWeakness.score}% <span className="text-action">(+{primaryWeakness.score - primaryWeakness.previousMonthScore}%p)</span></p></div></div></section> : null}
 
-      <section className="rounded-card border border-border bg-surface p-4"><h3 className="text-sm font-bold">5개 영역 정답률 비교</h3><div className="mt-3 h-52" aria-label="영역별 정답률 막대 차트"><ResponsiveContainer width="100%" height="100%"><BarChart data={areaScores} layout="vertical" margin={{ top: 4, right: 16, bottom: 4, left: 2 }}><CartesianGrid stroke="#EDF0F2" strokeDasharray="3 3" horizontal={false} /><XAxis type="number" domain={[0, 100]} tick={{ fontSize: 10, fill: "#98A2B3" }} axisLine={false} tickLine={false} /><YAxis type="category" dataKey="area" width={48} tick={{ fontSize: 11, fill: "#667085" }} axisLine={false} tickLine={false} /><Tooltip formatter={(value) => [`${value}%`, "정답률"]} /><Bar dataKey="score" radius={[0, 5, 5, 0]} animationDuration={650}>{areaScores.map((item) => <Cell key={item.area} fill={item.area === area ? "#FFC7A2" : "#8CC0EB"} />)}</Bar></BarChart></ResponsiveContainer></div><p className="text-[11px] text-subtle">회색 점선은 이번 달 자기 평균입니다.</p></section>
+      {/* 🔴 areaScores 가 비면 weaknessRanking 셀을 그대로 그린다. 비어 있으면 섹션째 감춘다 —
+          빈 카드를 두면 「그래프가 안 나온다」로 보인다. */}
+      {chartCells.length ? (
+      <section className="rounded-card border border-border bg-surface p-4"><h3 className="text-sm font-bold">{areaScores.length ? "영역별 정답률 비교" : "영역·유형별 정답률"}</h3><div className="mt-3 h-52" aria-label="영역별 정답률 막대 차트"><ResponsiveContainer width="100%" height="100%"><BarChart data={chartCells} layout="vertical" margin={{ top: 4, right: 16, bottom: 4, left: 2 }}><CartesianGrid stroke="#EDF0F2" strokeDasharray="3 3" horizontal={false} /><XAxis type="number" domain={[0, 100]} tick={{ fontSize: 10, fill: "#98A2B3" }} axisLine={false} tickLine={false} /><YAxis type="category" dataKey="label" width={92} tick={{ fontSize: 10, fill: "#667085" }} axisLine={false} tickLine={false} /><Tooltip formatter={(value) => [`${value}%`, "정답률"]} /><Bar dataKey="score" radius={[0, 5, 5, 0]} animationDuration={650}>{chartCells.map((item) => <Cell key={item.label} fill={item.area === area ? "#FFC7A2" : "#8CC0EB"} />)}</Bar></BarChart></ResponsiveContainer></div></section>
+      ) : null}
 
       {/* 🔴 「왜 이 영역이 약점인가요?」·「함께 막힌 유형」·「다음 학습 제안」 세 섹션을 감춘다.
           쓰는 값이 전부 계약에 원천이 없다 — WeaknessCell 에 description·studyFrequency·
@@ -116,7 +153,7 @@ export function WeaknessDetail({ area }: { area: string }) {
 
       {primaryWeakness.relatedRecordId ? <Link href={routeBuilders.parent.record(primaryWeakness.relatedRecordId)} className="flex h-[52px] items-center justify-center rounded-xl border border-[#A9D4F2] bg-surface text-sm font-bold text-[#2F6FA7]">근거 학습기록 보기</Link> : null}
       <Link href={routeBuilders.parent.newConsultation({ type: "analysis", id: `weakness-${area}`, label: `${area} 취약 영역 분석`, detail: `${skill} · 정답률 ${score}%` })} className="flex h-[52px] items-center justify-center rounded-xl bg-brand text-sm font-bold text-[#4C3024]">이 분석으로 상담 요청</Link>
-      <div className="flex gap-2 rounded-xl bg-warning-soft p-3 text-xs leading-5 text-[#7C6210]"><AlertTriangle size={17} className="mt-0.5 shrink-0" /><p>10문항 미만인 유형은 약점으로 단정하지 않고 판단 보류로 표시합니다.</p></div>
+      <div className="flex gap-2 rounded-xl bg-warning-soft p-3 text-xs leading-5 text-[#7C6210]"><AlertTriangle size={17} className="mt-0.5 shrink-0" /><p>표본이 최소치에 못 미치는 유형은 약점으로 단정하지 않고 판단 보류로 표시합니다.</p></div>
     </div>
   );
 }

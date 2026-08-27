@@ -208,7 +208,13 @@ export function toParentHome(dto: HomeDto): ParentHomeResponse {
 
 export function toParentAnalysis(dto: AnalysisDto): ParentAnalysisResponse {
   const available = dto.overall.status === "AVAILABLE";
-  const weakness = dto.primaryWeakness ?? dto.weaknessRanking[0] ?? null;
+  /**
+   * 🔴 표본이 모자란 셀은 1순위 후보에서 뺀다. 9문항짜리가 1순위가 되면 안 된다.
+   * 서버가 primaryWeakness 를 주면 그것을 쓰고, 없을 때만 표본을 채운 셀 중 첫 번째를 쓴다.
+   */
+  const hasEnoughSample = (cell: WeaknessDto) =>
+    cell.improvement?.minimumSampleSize == null || (cell.scoredCount ?? 0) >= cell.improvement.minimumSampleSize;
+  const weakness = dto.primaryWeakness ?? dto.weaknessRanking.find(hasEnoughSample) ?? null;
   return {
     accuracy: available ? toPercent(dto.overall.accuracyRate) ?? 0 : 0,
     // 🔴 계약에 baseline(비교군 평균) 원본이 없다. 0 으로 두고 화면이 표시하지 않는다.
@@ -237,8 +243,12 @@ export function toParentAnalysis(dto: AnalysisDto): ParentAnalysisResponse {
         skill: typeLabel(cell.typeTag),
         accuracy: toPercent(cell.accuracyRate) ?? 0,
         questionCount: cell.scoredCount ?? 0,
-        gapFromBaseline: cell.improvement?.accuracyDeltaPp ?? 0,
-        status: cell.status === "AVAILABLE" ? "confirmed" : "watch",
+        /**
+         * 🔴 전월 대비 퍼센트포인트. 값을 낼 수 없으면 null 이다 — 0 으로 채우지 않는다.
+         * 0 으로 채우면 「변화 없음」이라는 없는 사실을 말하게 된다.
+         */
+        accuracyDeltaPp: cell.improvement?.accuracyDeltaPp ?? null,
+        minimumSampleSize: cell.improvement?.minimumSampleSize ?? null,
       })),
     primaryWeakness: toPrimaryWeakness(weakness),
   };

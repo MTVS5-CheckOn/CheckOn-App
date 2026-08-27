@@ -61,8 +61,14 @@ export type ParentAnalysisResponse = {
     skill: string;
     accuracy: number;
     questionCount: number;
-    gapFromBaseline: number;
-    status: "confirmed" | "watch";
+    /**
+     * 🔴 계약의 `improvement.accuracyDeltaPp` — **전월 대비 퍼센트포인트**다.
+     * 「자기 기준 대비」가 아니고, **양수면 개선**이다(43%→51% 은 +8.0).
+     * 값을 낼 수 없으면(표본 부족 등) null 이다 — 0 으로 채우지 않는다.
+     */
+    accuracyDeltaPp: number | null;
+    /** 판정에 쓴 최소 표본 수. `questionCount` 가 이보다 적으면 판단 보류다. */
+    minimumSampleSize: number | null;
   }[];
   misconceptionSummary: { area: string; label: string; count: number }[];
   primaryWeakness: {
