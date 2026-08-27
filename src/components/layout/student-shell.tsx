@@ -5,7 +5,7 @@ import { AppBar } from "@/components/layout/app-bar";
 import { BottomNavigation } from "@/components/layout/bottom-navigation";
 import { ROUTES, routeBuilders } from "@/config/routes";
 
-type StudentChrome = { title: string; backHref?: string; action?: { label: string; href: string }; bottomNavigation: boolean; notification?: boolean };
+type StudentChrome = { title: string; brandLogo?: boolean; backHref?: string; action?: { label: string; href: string }; bottomNavigation: boolean; notification?: boolean };
 
 function resolveChrome(pathname: string): StudentChrome {
   const worksheetMatch = pathname.match(/^\/student\/worksheets\/([^/]+)/);
@@ -24,7 +24,7 @@ function resolveChrome(pathname: string): StudentChrome {
   if (pathname === ROUTES.student.questions) return { title: "질문", action: { label: "질문하기", href: "/student/questions/new" }, bottomNavigation: true };
   if (pathname === "/student/profile/invite") return { title: "초대 코드 등록", backHref: ROUTES.student.profile, bottomNavigation: false };
   if (pathname === ROUTES.student.profile) return { title: "내 정보", bottomNavigation: true };
-  return { title: "Check-On", bottomNavigation: true, notification: pathname === ROUTES.student.home };
+  return { title: "Check-On", brandLogo: pathname === ROUTES.student.home, bottomNavigation: true, notification: pathname === ROUTES.student.home };
 }
 
 export function StudentShell({ children }: { children: React.ReactNode }) {
@@ -32,7 +32,7 @@ export function StudentShell({ children }: { children: React.ReactNode }) {
   const chrome = resolveChrome(pathname);
   return (
     <div className="relative mx-auto min-h-dvh w-full max-w-[390px] bg-app shadow-[0_0_40px_rgb(32_41_57/12%)]">
-      <AppBar title={chrome.title} backHref={chrome.backHref} action={chrome.action} hasNotification={chrome.notification} />
+      <AppBar title={chrome.title} brandLogo={chrome.brandLogo} backHref={chrome.backHref} action={chrome.action} hasNotification={chrome.notification} />
       <main className={`min-h-[calc(100dvh-76px)] ${chrome.bottomNavigation ? "pb-[calc(80px+env(safe-area-inset-bottom))]" : ""}`}>{children}</main>
       {chrome.bottomNavigation ? <BottomNavigation mode="student" /> : null}
     </div>
