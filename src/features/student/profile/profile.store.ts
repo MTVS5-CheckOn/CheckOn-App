@@ -3,7 +3,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type ConnectedTeacher = { id: string; name: string; academy: string; subject: string };
+/** 🔴 `academy` 는 계약(TeacherSummary)에 없다. `subject` 는 현재 항상 null 이다. */
+export type ConnectedTeacher = { id: string; name: string; subject: string | null };
 type ProfileState = {
   teachers: ConnectedTeacher[];
   notificationsEnabled: boolean;
@@ -12,7 +13,7 @@ type ProfileState = {
   setNotifications: (enabled: boolean) => void;
 };
 
-const DEFAULT_TEACHER: ConnectedTeacher = { id: "teacher-1", name: "박지은 선생님", academy: "한울국어학원", subject: "문학·독서 담당" };
+const DEFAULT_TEACHER: ConnectedTeacher = { id: "teacher-1", name: "박지은 선생님", subject: null };
 
 export const useStudentProfileStore = create<ProfileState>()(persist((set) => ({
   teachers: [DEFAULT_TEACHER],

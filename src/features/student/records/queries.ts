@@ -5,7 +5,7 @@ import { learningRecordGateway } from "@/features/student/records/api";
 import { queryKeys } from "@/lib/api/query-keys";
 
 export function useLearningRecordsQuery() {
-  return useQuery({ queryKey: queryKeys.student.records(), queryFn: () => learningRecordGateway.list() });
+  return useQuery({ queryKey: queryKeys.student.records(), queryFn: () => learningRecordGateway.list(), select: (page) => page.items });
 }
 
 export function useLearningRecordQuery(recordId: string) {
