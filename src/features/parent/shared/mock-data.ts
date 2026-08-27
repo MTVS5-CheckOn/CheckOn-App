@@ -33,6 +33,6 @@ export const parentAnalysis: ParentAnalysisResponse = {
 export const parentProfile: ParentProfileResponse = { id: "parent-1", name: "이순영", maskedPhone: "010-XXXX-5678", notificationsEnabled: true, children: [{ studentId: "student-1", studentPublicId: "STU-A41C", name: "김민준", grade: "고2", active: true }], teachers: [{ id: "teacher-1", name: "박지은 선생님", subject: null }] };
 
 export const parentNotifications: ParentNotification[] = [
-  { id: "notification-1", type: "report", title: "8월 월별 보고서가 도착했어요", body: "박지은 선생님이 김민준 학생의 보고서를 발행했습니다.", createdAt: "오늘 14:20", read: false, href: "/parent/reports/r1" },
-  { id: "notification-2", type: "learning", title: "이번 주 학습이 완료됐어요", body: "화법과작문 실전 모의 정답률은 73%입니다.", createdAt: "8월 18일", read: false },
+  { id: "notification-1", type: "report", title: "8월 월별 보고서가 도착했어요", body: "박지은 선생님이 김민준 학생의 보고서를 발행했습니다.", createdAt: "오늘 14:20", read: false, target: { studentId: "student-1", resourceId: "r1" } },
+  { id: "notification-2", type: "learning", title: "이번 주 학습이 완료됐어요", body: "화법과작문 실전 모의 정답률은 73%입니다.", createdAt: "8월 18일", read: false, target: { studentId: "student-1", resourceId: "l1" } },
 ];

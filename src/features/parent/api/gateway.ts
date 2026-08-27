@@ -77,6 +77,8 @@ export interface ParentGateway {
 
 const wait = (milliseconds = 180) => new Promise((resolve) => setTimeout(resolve, milliseconds));
 
+let mockNotifications = parentNotifications.map((notification) => ({ ...notification }));
+
 /** mock 도 HTTP 와 같은 cursor page 모양으로 답한다 — 화면에 분기를 만들지 않기 위해서다. */
 function mockPage<T>(items: T[]): CursorPage<T> {
   return { items, nextCursor: null, hasNext: false };
@@ -91,9 +93,15 @@ const mockParentGateway: ParentGateway = {
   async getReport(_studentId, reportId) { await wait(); return parentReports.find((item) => item.id === reportId) ?? null; },
   async getProfile() { await wait(); return parentProfile; },
   async updateNotificationPreference(enabled) { await wait(); useParentStore.getState().setNotifications(enabled); },
-  async listNotifications() { await wait(); return mockPage(parentNotifications); },
-  async markNotificationRead() { await wait(); },
-  async markAllNotificationsRead() { await wait(); },
+  async listNotifications() { await wait(); return mockPage(mockNotifications); },
+  async markNotificationRead(notificationId) {
+    await wait();
+    mockNotifications = mockNotifications.map((notification) => notification.id === notificationId ? { ...notification, read: true } : notification);
+  },
+  async markAllNotificationsRead() {
+    await wait();
+    mockNotifications = mockNotifications.map((notification) => ({ ...notification, read: true }));
+  },
   async listConsultations(studentId) {
     await wait();
     return mockPage(useParentConsultationStore.getState().consultations.filter((item) => item.studentId === studentId));

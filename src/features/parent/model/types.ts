@@ -122,10 +122,13 @@ export type ParentProfileResponse = {
 
 export type ParentNotification = {
   id: string;
-  type: "report" | "learning" | "consultation";
+  type: "report" | "consultation" | "question" | "learning" | "child";
   title: string;
   body: string;
   createdAt: string;
   read: boolean;
-  href?: string;
+  target: {
+    studentId: string | null;
+    resourceId: string | null;
+  } | null;
 };

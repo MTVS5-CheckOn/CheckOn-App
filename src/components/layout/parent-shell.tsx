@@ -6,7 +6,7 @@ import { AppBar } from "@/components/layout/app-bar";
 import { BottomNavigation } from "@/components/layout/bottom-navigation";
 import { ROUTES, routeBuilders } from "@/config/routes";
 import { useSelectedChild } from "@/features/parent/shared/parent.store";
-import { useParentProfileQuery } from "@/features/parent/api/queries";
+import { useParentNotificationsQuery, useParentProfileQuery } from "@/features/parent/api/queries";
 import { useParentStore } from "@/features/parent/shared/parent.store";
 
 type ParentChrome = { title: string; backHref?: string; bottomNavigation: boolean; notification?: boolean; selectable?: boolean; action?: { label: string; href: string } };
@@ -39,12 +39,15 @@ export function ParentShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const child = useSelectedChild();
   const hydrateProfile = useParentStore((state) => state.hydrateProfile);
+  const isAuthRoute = pathname === ROUTES.auth.parentLogin || pathname === ROUTES.auth.parentSignup;
   const profileQuery = useParentProfileQuery();
+  const notificationsQuery = useParentNotificationsQuery({ enabled: !isAuthRoute });
   useEffect(() => { if (profileQuery.data) hydrateProfile(profileQuery.data); }, [hydrateProfile, profileQuery.data]);
-  if (pathname === ROUTES.auth.parentLogin || pathname === ROUTES.auth.parentSignup) return <>{children}</>;
+  if (isAuthRoute) return <>{children}</>;
   const chrome = resolveChrome(pathname, child?.name ?? "자녀 선택");
+  const hasUnreadNotification = notificationsQuery.data?.some((notification) => !notification.read) ?? false;
   return <div className="relative mx-auto min-h-dvh w-full max-w-[390px] bg-app shadow-[0_0_40px_rgb(32_41_57/12%)]">
-    <AppBar title={chrome.title} selectableTitle={chrome.selectable} hasNotification={chrome.notification} backHref={chrome.backHref} action={chrome.action} />
+    <AppBar title={chrome.title} selectableTitle={chrome.selectable} hasNotification={chrome.notification} hasUnreadNotification={hasUnreadNotification} notificationHref={ROUTES.parent.notifications} backHref={chrome.backHref} action={chrome.action} />
     <main className={`min-h-[calc(100dvh-76px)] ${chrome.bottomNavigation ? "pb-[calc(80px+env(safe-area-inset-bottom))]" : ""}`}>{children}</main>
     {chrome.bottomNavigation ? <BottomNavigation mode="parent" /> : null}
   </div>;

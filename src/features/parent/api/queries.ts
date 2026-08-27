@@ -18,7 +18,14 @@ export const useParentAnalysisQuery = (studentId: string, month: string = curren
 export const useParentReportsQuery = (studentId: string) => useQuery({ queryKey: queryKeys.parent.reports(studentId), queryFn: () => parentGateway.listReports(studentId), select: (page) => page.items, enabled: Boolean(studentId) });
 export const useParentReportQuery = (studentId: string, reportId: string) => useQuery({ queryKey: queryKeys.parent.report(studentId, reportId), queryFn: () => parentGateway.getReport(studentId, reportId), enabled: Boolean(studentId && reportId) });
 export const useParentProfileQuery = () => useQuery({ queryKey: queryKeys.parent.profile(), queryFn: () => parentGateway.getProfile() });
-export const useParentNotificationsQuery = () => useQuery({ queryKey: queryKeys.parent.notifications(), queryFn: () => parentGateway.listNotifications(), select: (page) => page.items });
+type ParentNotificationQueryOptions = { enabled?: boolean };
+
+export const useParentNotificationsQuery = ({ enabled = true }: ParentNotificationQueryOptions = {}) => useQuery({
+  queryKey: queryKeys.parent.notifications({ limit: 50 }),
+  queryFn: () => parentGateway.listNotifications({ limit: 50 }),
+  select: (page) => page.items,
+  enabled,
+});
 export const useParentConsultationsQuery = (studentId: string) => useQuery({ queryKey: queryKeys.parent.consultations(studentId), queryFn: () => parentGateway.listConsultations(studentId), select: (page) => page.items, enabled: Boolean(studentId) });
 export const useParentConsultationQuery = (studentId: string, consultationId: string) => useQuery({ queryKey: queryKeys.parent.consultation(studentId, consultationId), queryFn: () => parentGateway.getConsultation(studentId, consultationId), enabled: Boolean(studentId && consultationId) });
 
@@ -40,12 +47,12 @@ export function useCreateConsultationMutation(studentId: string) {
 
 export function useMarkNotificationReadMutation() {
   const queryClient = useQueryClient();
-  return useMutation({ mutationFn: (notificationId: string) => parentGateway.markNotificationRead(notificationId), onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.parent.notifications() }) });
+  return useMutation({ mutationFn: (notificationId: string) => parentGateway.markNotificationRead(notificationId), onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.parent.notificationsRoot() }) });
 }
 
 export function useMarkAllNotificationsReadMutation() {
   const queryClient = useQueryClient();
-  return useMutation({ mutationFn: () => parentGateway.markAllNotificationsRead(), onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.parent.notifications() }) });
+  return useMutation({ mutationFn: () => parentGateway.markAllNotificationsRead(), onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.parent.notificationsRoot() }) });
 }
 
 export function useUpdateParentNotificationsMutation() {

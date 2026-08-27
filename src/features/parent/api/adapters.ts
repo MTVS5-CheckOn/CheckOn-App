@@ -55,9 +55,9 @@ const CONSULTATION_STATUS: Record<string, ConsultationStatus> = {
 const NOTIFICATION_TYPES: Record<string, ParentNotification["type"]> = {
   REPORT_PUBLISHED: "report",
   CONSULTATION_ANSWERED: "consultation",
-  QUESTION_ANSWERED: "consultation",
+  QUESTION_ANSWERED: "question",
   LEARNING_SUBMITTED: "learning",
-  CHILD_LINKED: "learning",
+  CHILD_LINKED: "child",
 };
 
 export const areaLabel = (tag: string | null | undefined) => (tag ? AREA_LABELS[tag] ?? "기타" : "기타");
@@ -345,6 +345,10 @@ export function toParentNotification(dto: NotificationDto): ParentNotification {
     body: dto.body ?? "",
     createdAt: toDisplayDate(dto.createdAt),
     read: dto.read,
+    target: dto.target ? {
+      studentId: dto.target.studentId ?? null,
+      resourceId: dto.target.resourceId ?? null,
+    } : null,
   };
 }
 

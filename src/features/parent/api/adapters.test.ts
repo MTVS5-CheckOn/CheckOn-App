@@ -4,6 +4,7 @@ import {
   consultationStatusOf,
   notificationTypeOf,
   toChild,
+  toParentNotification,
   toParentAnalysis,
   toParentConsultationDetail,
   toParentHome,
@@ -36,6 +37,20 @@ describe("계약 → 도메인 adapter", () => {
     expect(consultationStatusOf("ANSWERED")).toBe("answered");
     expect(consultationStatusOf("CANCELLED")).toBe("cancelled");
     expect(notificationTypeOf("REPORT_PUBLISHED")).toBe("report");
+    expect(notificationTypeOf("QUESTION_ANSWERED")).toBe("question");
+    expect(notificationTypeOf("CHILD_LINKED")).toBe("child");
+  });
+
+  it("알림 target의 학생과 리소스 ID를 잃지 않는다", () => {
+    const notification = toParentNotification({
+      notificationId: "n1",
+      type: "REPORT_PUBLISHED",
+      title: "보고서 발행",
+      createdAt: "2026-08-28T02:00:00Z",
+      read: false,
+      target: { studentId: "s1", resourceId: "rep1" },
+    });
+    expect(notification.target).toEqual({ studentId: "s1", resourceId: "rep1" });
   });
 
   it("학습기록 요약을 도메인으로 옮긴다", () => {

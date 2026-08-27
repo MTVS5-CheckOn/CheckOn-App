@@ -43,6 +43,7 @@ export const queryKeys = {
       [...queryKeys.parent.all, "consultations", studentId, "detail", consultationId] as const,
     children: () => [...queryKeys.parent.all, "children"] as const,
     profile: () => [...queryKeys.parent.all, "profile"] as const,
-    notifications: (params?: ListParams) => [...queryKeys.parent.all, "notifications", list(params)] as const,
+    notificationsRoot: () => [...queryKeys.parent.all, "notifications"] as const,
+    notifications: (params?: ListParams) => [...queryKeys.parent.notificationsRoot(), list(params)] as const,
   },
 } as const;
