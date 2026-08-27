@@ -50,6 +50,7 @@ import {
   toParentRecord,
   toParentRecordDetail,
   toParentReport,
+  toParentReportDetail,
 } from "@/features/parent/api/adapters";
 
 export type ListQuery = { cursor?: string | null; limit?: number };
@@ -158,7 +159,7 @@ export const httpParentGateway: ParentGateway = {
   },
 
   getReport: async (studentId, reportId) =>
-    toParentReport(parseApiResponse(reportDetailSchema, await apiRequest(endpoints.parent.report(studentId, reportId)), "parent.report")),
+    toParentReportDetail(parseApiResponse(reportDetailSchema, await apiRequest(endpoints.parent.report(studentId, reportId)), "parent.report")),
 
   getProfile: async () =>
     toParentProfile(parseApiResponse(parentProfileSchema, await apiRequest(endpoints.parent.profile()), "parent.profile")),

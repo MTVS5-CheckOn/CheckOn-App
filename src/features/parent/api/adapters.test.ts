@@ -9,6 +9,7 @@ import {
   toParentRecord,
   toParentRecordDetail,
   toParentReport,
+  toParentReportDetail,
   toPercent,
   typeLabel,
 } from "@/features/parent/api/adapters";
@@ -80,6 +81,21 @@ describe("계약 → 도메인 adapter", () => {
     expect(report.month).toBe(8);
     // 🔴 academyName 은 계약에 없다. 강사 이름만 쓴다.
     expect(report.teacher).toBe("박지은 선생님");
+  });
+
+  it("🔴 보고서 상세의 sections 를 버리지 않는다 — 버리면 거짓 빈 상태가 뜬다", () => {
+    const report = toParentReportDetail({
+      reportId: "rep1", reportMonth: "2026-08", status: "PUBLISHED",
+      publishedAt: "2026-08-19T01:00:00Z", teacher, hasPdf: false,
+      sections: [
+        { kind: "MONTHLY", title: "월간 분석", status: "AVAILABLE", body: "정답률이 올랐습니다" },
+        { kind: "PERCENTILE", title: "전국 백분위", status: "NOT_PRODUCED", unproducedReason: "산출하지 않는 지표입니다" },
+      ],
+    });
+    expect(report.sections).toHaveLength(2);
+    expect(report.sections[0]).toEqual({ title: "월간 분석", description: "정답률이 올랐습니다", status: "available" });
+    // 🔴 미산출은 사유를 보여준다. 빈칸으로 두지 않는다.
+    expect(report.sections[1]).toEqual({ title: "전국 백분위", description: "산출하지 않는 지표입니다", status: "insufficient" });
   });
 
   it("🔴 강사 답변 전에는 messages 가 빈 배열이고 정상이다", () => {

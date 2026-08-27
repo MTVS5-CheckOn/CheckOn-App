@@ -9,6 +9,7 @@ import type {
   parentAnalysisSchema,
   parentHomeSchema,
   parentProfileSchema,
+  reportDetailSchema,
   reportSummarySchema,
   weaknessCellSchema,
 } from "@/features/parent/api/schemas";
@@ -91,6 +92,7 @@ type RecordDetailDto = z.infer<typeof learningRecordDetailSchema>;
 type HomeDto = z.infer<typeof parentHomeSchema>;
 type AnalysisDto = z.infer<typeof parentAnalysisSchema>;
 type ReportSummaryDto = z.infer<typeof reportSummarySchema>;
+type ReportDetailDto = z.infer<typeof reportDetailSchema>;
 type ProfileDto = z.infer<typeof parentProfileSchema>;
 type NotificationDto = z.infer<typeof notificationSchema>;
 type ConsultationDto = z.infer<typeof consultationSchema>;
@@ -283,6 +285,23 @@ export function toParentReport(dto: ReportSummaryDto): ParentReport {
     sections: [],
     // 🔴 PDF 는 아직 연결되지 않았다. 계약상 false 가 정상이다.
     hasPdf: dto.hasPdf ?? false,
+  };
+}
+
+/**
+ * 🔴 보고서 **상세**는 `sections` 를 준다(계약 ReportDetail required).
+ * 요약 adapter 로만 옮기면 서버가 보낸 분석 항목을 통째로 버리고
+ * 화면이 "표시할 항목이 없습니다"라는 **거짓 빈 상태**를 그린다.
+ */
+export function toParentReportDetail(dto: ReportDetailDto): ParentReport {
+  return {
+    ...toParentReport(dto),
+    sections: dto.sections.map((section) => ({
+      title: section.title ?? section.kind,
+      // status 가 AVAILABLE 이 아니면 body 대신 미산출 사유를 보여준다.
+      description: section.status === "AVAILABLE" ? section.body ?? "" : section.unproducedReason ?? "",
+      status: section.status === "AVAILABLE" ? "available" : "insufficient",
+    })),
   };
 }
 
