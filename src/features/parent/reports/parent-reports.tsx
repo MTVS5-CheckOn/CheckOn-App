@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, ChevronLeft, ChevronRight, Download, FileText, Info, Share2 } from "lucide-react";
+import { CheckCircle2, ChevronLeft, ChevronRight, Download, FileText, Info, MessageSquareText, Share2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -32,7 +32,35 @@ export function ParentReportDetail({ reportId }: { reportId: string }) {
     try { if (navigator.share) await navigator.share(data); else await navigator.clipboard.writeText(window.location.href); setShared(true); } catch { return; }
   }
   const { summary } = report;
-  return <div className="flex min-h-[calc(100dvh-76px)] flex-col"><div className="space-y-4 p-5"><div className="flex justify-end"><button onClick={share} className="flex h-10 items-center gap-2 rounded-xl border border-border bg-surface px-3 text-sm font-semibold text-action"><Share2 size={17} />공유</button></div>{shared ? <div className="flex items-center gap-2 rounded-xl bg-[#E8F6F1] p-3 text-sm font-semibold text-[#26856B]"><CheckCircle2 size={18} />보고서 링크를 공유했습니다.</div> : null}<section className="rounded-card border border-border bg-surface p-5"><dl className="space-y-3 text-sm"><Row label="보고서" value={`${report.year}년 ${report.month}월`} /><Row label="자녀명" value={report.studentName} /><Row label="담당 강사" value={report.teacher} /><Row label="발행일" value={report.issuedAt} /><Row label="학습 기간" value={report.studyPeriod} /><Row label="페이지 수" value={`${report.pages}페이지`} /></dl></section><section className="rounded-card border border-border bg-surface p-5"><h2 className="text-sm font-bold text-muted">이번 달 핵심</h2><dl className="mt-4 grid grid-cols-3 text-center"><Summary value={`${summary.accuracy}%`} label="정답률" /><Summary value={`${summary.percentile}위`} label="전국 백분위" action /><Summary value={summary.priorityArea} label="우선 보완" danger /></dl><p className="mt-4 text-center text-[11px] text-subtle">전국 동일 학년 표본 · {summary.sampleAsOf} 기준</p></section><Link href={routeBuilders.parent.newConsultation({ type: "report", id: report.id, label: `${report.year}년 ${report.month}월 월별 보고서`, detail: `정답률 ${summary.accuracy}% · 전국 백분위 ${summary.percentile}위 · 우선 보완 ${summary.priorityArea}` })} className="flex h-[52px] items-center justify-center rounded-xl border border-[#A9D4F2] bg-surface text-sm font-bold text-[#2F6FA7]">이 보고서로 상담 요청</Link><div className="flex gap-2 rounded-xl border border-[#A9D4F2] bg-[#EEF7FF] p-3 text-xs leading-5 text-muted"><Info size={17} className="mt-0.5 shrink-0 text-action" />강사가 검토·승인·발행한 확정 보고서입니다.</div></div><div className="sticky bottom-0 mt-auto border-t border-divider bg-surface p-5"><Link href={routeBuilders.parent.reportPdf(report.id)} className="flex h-[52px] items-center justify-center rounded-xl bg-brand text-sm font-bold text-[#4C3024]">PDF 보고서 보기</Link></div></div>;
+  return (
+    <div className="flex min-h-[calc(100dvh-76px)] flex-col">
+      <div className="space-y-4 p-5">
+        <div className="flex items-center justify-between"><div><p className="text-xs text-subtle">{report.studyPeriod}</p><p className="mt-1 text-sm font-bold">{report.studentName} 학생 · {report.teacher}</p></div><button onClick={share} className="flex h-10 items-center gap-2 rounded-xl border border-border bg-surface px-3 text-sm font-semibold text-action"><Share2 size={17} />공유</button></div>
+        {shared ? <div className="flex items-center gap-2 rounded-xl bg-[#E8F6F1] p-3 text-sm font-semibold text-[#26856B]"><CheckCircle2 size={18} />보고서 링크를 공유했습니다.</div> : null}
+
+        <section className="rounded-card border border-border bg-surface p-5 shadow-[var(--checkon-shadow-card)]">
+          <div className="flex items-center justify-between"><div><p className="text-xs text-muted">월별 학습 보고서</p><h2 className="mt-1 text-xl font-bold">{report.year}년 {report.month}월</h2></div><span className="rounded-lg bg-brand-soft px-3 py-2 text-xs font-bold text-[#7D452C]">발행 완료</span></div>
+          <dl className="mt-5 grid grid-cols-3 text-center"><Summary value={`${summary.accuracy}%`} label="정답률" /><Summary value={`+${summary.weaknessImprovement}%p`} label="약점 개선도" action /><Summary value={summary.priorityArea} label="우선 보완" danger /></dl>
+          <div className="mt-4 grid grid-cols-2 gap-2 rounded-xl bg-[#F7F8FA] p-3 text-center"><div><strong className="text-sm">{summary.gradedQuestionCount}문항</strong><p className="mt-1 text-[10px] text-subtle">판정에 사용한 기록</p></div><div className="border-l border-divider"><strong className="text-sm text-[#E85A4F]">{summary.repeatedMistakeCount}건</strong><p className="mt-1 text-[10px] text-subtle">최근 반복 실수</p></div></div>
+          <p className="mt-3 text-center text-[11px] text-subtle">우선 보완 영역 정답률 · {summary.comparisonMonth} 대비</p>
+        </section>
+
+        <section className="rounded-card border border-[#FFD2B8] bg-[#FFF8F3] p-4">
+          <div className="flex items-center gap-2"><MessageSquareText size={18} className="text-[#C9572B]" /><h2 className="text-sm font-bold">선생님 의견</h2></div>
+          <p className="mt-3 text-sm leading-6 text-muted">{report.teacherComment}</p>
+        </section>
+
+        <section className="rounded-card border border-border bg-surface p-4">
+          <div className="flex items-center justify-between"><h2 className="text-sm font-bold">보고서에 포함된 분석</h2><span className="text-[11px] text-subtle">{report.pages}페이지</span></div>
+          <div className="mt-3 divide-y divide-divider">{report.sections.map((section) => <div key={section.title} className="flex items-center gap-3 py-3"><span className={`grid size-8 shrink-0 place-items-center rounded-full ${section.status === "available" ? "bg-[#E8F6F1] text-[#26856B]" : "bg-[#F0F2F5] text-subtle"}`}>{section.status === "available" ? <CheckCircle2 size={16} /> : <Info size={16} />}</span><div className="min-w-0"><p className="text-sm font-semibold">{section.title}</p><p className="mt-0.5 text-[11px] text-subtle">{section.description}</p></div></div>)}</div>
+        </section>
+
+        <Link href={routeBuilders.parent.newConsultation({ type: "report", id: report.id, label: `${report.year}년 ${report.month}월 월별 보고서`, detail: `정답률 ${summary.accuracy}% · 약점 개선도 +${summary.weaknessImprovement}%p · 우선 보완 ${summary.priorityArea}` })} className="flex h-[52px] items-center justify-center rounded-xl border border-[#A9D4F2] bg-surface text-sm font-bold text-[#2F6FA7]">이 보고서로 상담 요청</Link>
+        <div className="flex gap-2 rounded-xl border border-[#A9D4F2] bg-[#EEF7FF] p-3 text-xs leading-5 text-muted"><Info size={17} className="mt-0.5 shrink-0 text-action" />강사가 실제 학습 기록과 판정 근거를 확인한 뒤 발행한 보고서입니다.</div>
+      </div>
+      <div className="sticky bottom-0 mt-auto border-t border-divider bg-surface p-5"><Link href={routeBuilders.parent.reportPdf(report.id)} className="flex h-[52px] items-center justify-center rounded-xl bg-brand text-sm font-bold text-[#4C3024]">PDF 보고서 전체 보기</Link></div>
+    </div>
+  );
 }
 
 export function ParentPdfViewer({ reportId }: { reportId: string }) {
@@ -48,5 +76,4 @@ export function ParentPdfViewer({ reportId }: { reportId: string }) {
 }
 
 function EmptyReport() { return <section className="rounded-card border border-border bg-surface px-5 py-12 text-center"><FileText className="mx-auto text-subtle" /><p className="mt-3 text-sm font-bold">발행된 월별 보고서가 없어요</p><p className="mt-1 text-xs text-muted">강사가 보고서를 발행하면 이곳에서 확인할 수 있습니다.</p></section>; }
-function Row({ label, value }: { label: string; value: string }) { return <div className="flex gap-3"><dt className="text-muted">{label}</dt><dd className="ml-auto text-right font-semibold">{value}</dd></div>; }
 function Summary({ value, label, action, danger }: { value: string; label: string; action?: boolean; danger?: boolean }) { return <div><dd className={`text-2xl font-bold ${action ? "text-action" : danger ? "text-[#E85A4F]" : ""}`}>{value}</dd><dt className="mt-1 text-xs text-muted">{label}</dt></div>; }

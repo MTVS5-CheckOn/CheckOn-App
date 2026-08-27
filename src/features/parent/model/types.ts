@@ -15,6 +15,17 @@ export type ParentRecord = {
     totalTime: string;
     wrongTypeSummary: string;
     overtimeQuestionSummary: string;
+    baselineAccuracy: number;
+    correctCount: number;
+    reviewCount: number;
+    repeatedMistakeCount: number;
+    insight: string;
+    skillResults: {
+      skill: string;
+      accuracy: number | null;
+      questionCount: number;
+      status: "stable" | "weak" | "insufficient";
+    }[];
   };
 };
 
@@ -26,12 +37,34 @@ export type ParentHomeResponse = {
 };
 
 export type ParentAnalysisResponse = {
-  percentile: number;
   accuracy: number;
-  changeFromPreviousMonth: number;
-  sampleAsOf: string;
+  baselineAccuracy: number;
+  weaknessImprovement: number;
+  comparisonMonth: string;
+  analysisAsOf: string;
+  gradedQuestionCount: number;
+  reviewQuestionCount: number;
+  repeatedMistakeCount: number;
   areaScores: { area: string; score: number }[];
   accuracyTrend: { label: string; accuracy: number }[];
+  weeklySummary: {
+    label: string;
+    accuracy: number;
+    questionCount: number;
+    reviewCount: number;
+    repeatedMistakes: number | null;
+  }[];
+  difficultyDistribution: { level: "하" | "중" | "상"; count: number }[];
+  weaknessRanking: {
+    rank: number;
+    area: string;
+    skill: string;
+    accuracy: number;
+    questionCount: number;
+    gapFromBaseline: number;
+    status: "confirmed" | "watch";
+  }[];
+  misconceptionSummary: { area: string; label: string; count: number }[];
   primaryWeakness: {
     area: string;
     skill: string;
@@ -40,6 +73,11 @@ export type ParentAnalysisResponse = {
     studyFrequency: string;
     averageTime: string;
     evidenceQuestionCount: number;
+    previousMonthScore: number;
+    repeatedMistakeCount: number;
+    misconception: string;
+    linkedWeaknesses: { label: string; relationScore: number }[];
+    nextAction: string;
     relatedRecordId?: string;
   };
 };
@@ -54,7 +92,16 @@ export type ParentReport = {
   issuedAt: string;
   isNew: boolean;
   studyPeriod: string;
-  summary: { accuracy: number; percentile: number; priorityArea: string; sampleAsOf: string };
+  summary: {
+    accuracy: number;
+    weaknessImprovement: number;
+    priorityArea: string;
+    comparisonMonth: string;
+    gradedQuestionCount: number;
+    repeatedMistakeCount: number;
+  };
+  teacherComment: string;
+  sections: { title: string; description: string; status: "available" | "insufficient" }[];
   pdf: { url: string; pageImageBasePath: string; pageLabels: string[] };
 };
 
