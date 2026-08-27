@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, ChevronRight, Download, FileText, Info, MessageSquareText, Share2 } from "lucide-react";
+import { CheckCircle2, ChevronRight, Download, FileText, Info, Share2 } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { isAccessExpired, reportFileGateway } from "@/features/parent/api/file-gateway";
@@ -28,34 +28,32 @@ export function ParentReportDetail({ reportId }: { reportId: string }) {
   if (isError) return <div className="p-8 text-center"><p className="text-sm font-bold">보고서를 불러오지 못했어요.</p><button onClick={() => refetch()} className="mt-4 rounded-xl bg-brand px-5 py-2 text-sm font-bold">다시 시도</button></div>;
   if (!report) return <div className="p-8 text-center text-sm text-muted">보고서를 찾을 수 없습니다.</div>;
   async function share() {
-    const data = { title: `Check-On ${report!.year}년 ${report!.month}월 보고서`, text: `${report!.studentName} 학생의 월별 학습 보고서입니다.`, url: window.location.href };
+    const data = { title: `Check-On ${report!.year}년 ${report!.month}월 보고서`, text: `${child?.name ?? "자녀"} 학생의 월별 학습 보고서입니다.`, url: window.location.href };
     try { if (navigator.share) await navigator.share(data); else await navigator.clipboard.writeText(window.location.href); setShared(true); } catch { return; }
   }
-  const { summary } = report;
   return (
     <div className="flex min-h-[calc(100dvh-76px)] flex-col">
       <div className="space-y-4 p-5">
-        <div className="flex items-center justify-between"><div><p className="text-xs text-subtle">{report.studyPeriod}</p><p className="mt-1 text-sm font-bold">{report.studentName} 학생 · {report.teacher}</p></div><button onClick={share} className="flex h-10 items-center gap-2 rounded-xl border border-border bg-surface px-3 text-sm font-semibold text-action"><Share2 size={17} />공유</button></div>
+        {/* 🔴 studyPeriod 는 계약에 원천이 없어 감춘다.
+            studentName 은 새 API 를 부르지 않고 이미 선택된 자녀(화면 상태)에서 가져온다. */}
+        <div className="flex items-center justify-between"><div><p className="mt-1 text-sm font-bold">{[child?.name, report.teacher].filter(Boolean).join(" 학생 · ")}</p></div><button onClick={share} className="flex h-10 items-center gap-2 rounded-xl border border-border bg-surface px-3 text-sm font-semibold text-action"><Share2 size={17} />공유</button></div>
         {shared ? <div className="flex items-center gap-2 rounded-xl bg-[#E8F6F1] p-3 text-sm font-semibold text-[#26856B]"><CheckCircle2 size={18} />보고서 링크를 공유했습니다.</div> : null}
 
         <section className="rounded-card border border-border bg-surface p-5 shadow-[var(--checkon-shadow-card)]">
           <div className="flex items-center justify-between"><div><p className="text-xs text-muted">월별 학습 보고서</p><h2 className="mt-1 text-xl font-bold">{report.year}년 {report.month}월</h2></div><span className="rounded-lg bg-brand-soft px-3 py-2 text-xs font-bold text-[#7D452C]">발행 완료</span></div>
-          <dl className="mt-5 grid grid-cols-3 text-center"><Summary value={`${summary.accuracy}%`} label="정답률" /><Summary value={`+${summary.weaknessImprovement}%p`} label="약점 개선도" action /><Summary value={summary.priorityArea} label="우선 보완" danger /></dl>
-          <div className="mt-4 grid grid-cols-2 gap-2 rounded-xl bg-[#F7F8FA] p-3 text-center"><div><strong className="text-sm">{summary.gradedQuestionCount}문항</strong><p className="mt-1 text-[10px] text-subtle">판정에 사용한 기록</p></div><div className="border-l border-divider"><strong className="text-sm text-[#E85A4F]">{summary.repeatedMistakeCount}건</strong><p className="mt-1 text-[10px] text-subtle">최근 반복 실수</p></div></div>
-          <p className="mt-3 text-center text-[11px] text-subtle">우선 보완 영역 정답률 · {summary.comparisonMonth} 대비</p>
+          {/* 🔴 summary.*(정답률·약점개선도·우선보완·채점문항·반복실수·비교월)는 계약에 원천이 없다.
+              ReportDetail.sections[].data 는 자유형 object 라 안쪽 키를 약속하지 않고,
+              발행 배치가 그 값을 항상 null 로 넣는다. 영구 감춤. */}
         </section>
 
-        <section className="rounded-card border border-[#FFD2B8] bg-[#FFF8F3] p-4">
-          <div className="flex items-center gap-2"><MessageSquareText size={18} className="text-[#C9572B]" /><h2 className="text-sm font-bold">선생님 의견</h2></div>
-          <p className="mt-3 text-sm leading-6 text-muted">{report.teacherComment}</p>
-        </section>
+        {/* 🔴 teacherComment 는 계약에 원천이 없다. 강사 의견은 sections 안에 온다. */}
 
         <section className="rounded-card border border-border bg-surface p-4">
           <div className="flex items-center justify-between"><h2 className="text-sm font-bold">보고서에 포함된 분석</h2><span className="text-[11px] text-subtle">{report.sections.length}개 항목</span></div>
           {report.sections.length === 0 ? <p className="mt-3 rounded-xl bg-[#F7F8FA] p-4 text-center text-xs text-muted">이 보고서에는 아직 표시할 분석 항목이 없습니다.</p> : null}<div className="mt-3 divide-y divide-divider">{report.sections.map((section) => <div key={section.title} className="flex items-center gap-3 py-3"><span className={`grid size-8 shrink-0 place-items-center rounded-full ${section.status === "available" ? "bg-[#E8F6F1] text-[#26856B]" : "bg-[#F0F2F5] text-subtle"}`}>{section.status === "available" ? <CheckCircle2 size={16} /> : <Info size={16} />}</span><div className="min-w-0"><p className="text-sm font-semibold">{section.title}</p><p className="mt-0.5 text-[11px] text-subtle">{section.description}</p></div></div>)}</div>
         </section>
 
-        <Link href={routeBuilders.parent.newConsultation({ type: "report", id: report.id, label: `${report.year}년 ${report.month}월 월별 보고서`, detail: `정답률 ${summary.accuracy}% · 약점 개선도 +${summary.weaknessImprovement}%p · 우선 보완 ${summary.priorityArea}` })} className="flex h-[52px] items-center justify-center rounded-xl border border-[#A9D4F2] bg-surface text-sm font-bold text-[#2F6FA7]">이 보고서로 상담 요청</Link>
+        <Link href={routeBuilders.parent.newConsultation({ type: "report", id: report.id, label: `${report.year}년 ${report.month}월 월별 보고서`, detail: `${report.year}년 ${report.month}월 보고서` })} className="flex h-[52px] items-center justify-center rounded-xl border border-[#A9D4F2] bg-surface text-sm font-bold text-[#2F6FA7]">이 보고서로 상담 요청</Link>
         <div className="flex gap-2 rounded-xl border border-[#A9D4F2] bg-[#EEF7FF] p-3 text-xs leading-5 text-muted"><Info size={17} className="mt-0.5 shrink-0 text-action" />강사가 실제 학습 기록과 판정 근거를 확인한 뒤 발행한 보고서입니다.</div>
       </div>
       <div className="sticky bottom-0 mt-auto border-t border-divider bg-surface p-5">{report.hasPdf
@@ -125,4 +123,6 @@ export function ParentPdfViewer({ reportId }: { reportId: string }) {
 }
 
 function EmptyReport() { return <section className="rounded-card border border-border bg-surface px-5 py-12 text-center"><FileText className="mx-auto text-subtle" /><p className="mt-3 text-sm font-bold">발행된 월별 보고서가 없어요</p><p className="mt-1 text-xs text-muted">강사가 보고서를 발행하면 이곳에서 확인할 수 있습니다.</p></section>; }
+/* 🔴 summary.* 가 계약에 원천이 없어 감췄다. 백엔드가 낼지 정해지면 되살린다. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function Summary({ value, label, action, danger }: { value: string; label: string; action?: boolean; danger?: boolean }) { return <div><dd className={`text-2xl font-bold ${action ? "text-action" : danger ? "text-[#E85A4F]" : ""}`}>{value}</dd><dt className="mt-1 text-xs text-muted">{label}</dt></div>; }

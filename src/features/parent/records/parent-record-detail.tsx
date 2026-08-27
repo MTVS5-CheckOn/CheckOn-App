@@ -2,7 +2,7 @@
 
 import { AlertCircle, CheckCircle2, Eye, RotateCcw } from "lucide-react";
 import Link from "next/link";
-import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ROUTES, routeBuilders } from "@/config/routes";
 import { useParentRecordQuery } from "@/features/parent/api/queries";
 import type { ParentRecord } from "@/features/parent/model/types";
@@ -32,18 +32,22 @@ export function ParentRecordDetail({ recordId }: { recordId: string }) {
         <p className="mt-2 text-xs text-subtle">2026.{record.date} · 채점 {record.questionCount}문항 · {record.elapsed}</p>
       </section>
 
-      <dl className="grid grid-cols-3 gap-2">
+      {/* 🔴 「다시 보기」·「반복 실수」는 계약에 원천이 없어 감춘다
+          (LearningRecordDetail 에 reviewCount·repeatedMistakeCount 가 없다). */}
+      <dl className="grid grid-cols-1 gap-2">
         <Metric label="맞힌 문항" value={`${detail.correctCount}개`} />
-        <Metric label="다시 보기" value={`${detail.reviewCount}개`} accent />
-        <Metric label="반복 실수" value={`${detail.repeatedMistakeCount}건`} danger={detail.repeatedMistakeCount > 0} />
       </dl>
 
+      {/* 🔴 insight 는 계약에 원천이 없다. weakness.description 이 AVAILABLE 일 때만 값이 있고,
+          없으면 섹션째 감춘다 — 제목만 남은 빈 카드를 두지 않는다. */}
+      {detail.insight ? (
       <section className="rounded-card border border-[#FFD2B8] bg-[#FFF8F3] p-4">
         <div className="flex items-start gap-3">
           <span className="grid size-9 shrink-0 place-items-center rounded-full bg-brand text-[#7D452C]"><Eye size={18} /></span>
           <div><h3 className="text-sm font-bold">이 기록에서 확인된 핵심</h3><p className="mt-1 text-sm leading-6 text-muted">{detail.insight}</p></div>
         </div>
       </section>
+      ) : null}
 
       <section className="rounded-card border border-border bg-surface p-4">
         <div className="flex items-end justify-between">
@@ -57,13 +61,15 @@ export function ParentRecordDetail({ recordId }: { recordId: string }) {
               <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#98A2B3" }} axisLine={false} tickLine={false} />
               <YAxis domain={[40, 100]} ticks={[40, 55, 70, 85, 100]} tick={{ fontSize: 11, fill: "#98A2B3" }} axisLine={false} tickLine={false} />
               <Tooltip formatter={(value) => [`${value}%`, "정답률"]} />
-              <ReferenceLine y={detail.baselineAccuracy} stroke="#98A2B3" strokeDasharray="5 4" label={{ value: `내 기준 ${detail.baselineAccuracy}%`, fill: "#667085", fontSize: 10, position: "insideTopRight" }} />
+              
               <Line type="monotone" dataKey="accuracy" stroke="#4C75DD" strokeWidth={3} dot={{ fill: "#8CC0EB", r: 4, strokeWidth: 0 }} animationDuration={650} />
             </LineChart>
           </ResponsiveContainer>
         </div>
       </section>
 
+      {/* 🔴 skillResults 는 계약에 원천이 없다. 비면 섹션째 감춘다. */}
+      {detail.skillResults.length ? (
       <section className="rounded-card border border-border bg-surface p-4">
         <div className="flex items-center justify-between"><h3 className="text-sm font-bold">유형별 학습 결과</h3><span className="text-[11px] text-subtle">10문항 미만 판단 보류</span></div>
         <div className="mt-3 divide-y divide-divider">
@@ -71,11 +77,15 @@ export function ParentRecordDetail({ recordId }: { recordId: string }) {
         </div>
         <div className="mt-3 flex gap-2 rounded-xl bg-[#F7F8FA] p-3 text-[11px] leading-5 text-muted"><AlertCircle size={16} className="mt-0.5 shrink-0" />표본이 적은 유형을 약점으로 단정하지 않고 다음 학습까지 지켜봅니다.</div>
       </section>
+      ) : null}
 
+      {detail.totalTime ? (
       <section className="rounded-card border border-border bg-surface p-4">
         <h3 className="text-sm font-bold">풀이 세부 정보</h3>
-        <dl className="mt-3 divide-y divide-divider text-sm"><Row label="총 풀이 시간" value={detail.totalTime} /><Row label="오답 유형" value={detail.wrongTypeSummary} /><Row label="시간 초과 문항" value={detail.overtimeQuestionSummary} /></dl>
+        {/* 🔴 「오답 유형」·「시간 초과 문항」은 계약에 원천이 없어 감춘다. */}
+        <dl className="mt-3 divide-y divide-divider text-sm"><Row label="총 풀이 시간" value={detail.totalTime} /></dl>
       </section>
+      ) : null}
 
       <div className="space-y-2">
         <Link href={ROUTES.parent.analysis} className="flex h-[52px] items-center justify-center rounded-xl border border-[#A9D4F2] bg-surface text-sm font-bold text-[#2F6FA7]">고급 분석 전체 보기</Link>

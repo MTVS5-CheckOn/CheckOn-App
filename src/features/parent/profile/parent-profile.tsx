@@ -40,7 +40,7 @@ export function ParentProfile() {
     <div className="space-y-7 px-5 py-4">
       <section className="flex items-center gap-4 rounded-card border border-border bg-surface p-5">
         <span className="grid size-14 place-items-center rounded-full bg-info-soft text-xl font-bold text-action">{profile.name.slice(0, 1)}</span>
-        <div><div className="flex items-center gap-2"><h2 className="text-lg font-bold">{profile.name}</h2><span className="rounded bg-[#EEF4FF] px-2 py-1 text-[11px] font-bold text-action">학부모</span></div><p className="mt-1 text-sm text-muted">{profile.maskedPhone}</p></div>
+        <div><div className="flex items-center gap-2"><h2 className="text-lg font-bold">{profile.name}</h2><span className="rounded bg-[#EEF4FF] px-2 py-1 text-[11px] font-bold text-action">학부모</span></div>{/* 🔴 maskedPhone 은 계약에 원천이 없다 — ParentProfile 에 전화번호 필드 자체가 없다. */}</div>
       </section>
 
       <ProfileSection title="상담"><Link href={ROUTES.parent.consultations} className="flex min-h-[60px] items-center gap-3 rounded-card border border-border bg-surface px-4"><span className="grid size-9 place-items-center rounded-full bg-brand-soft text-[#D96534]"><MessageCircle size={18} /></span><span className="flex-1 text-sm font-semibold">상담 내역</span><ChevronRight size={18} className="text-subtle" /></Link></ProfileSection>
