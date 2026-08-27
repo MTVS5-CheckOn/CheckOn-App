@@ -78,12 +78,8 @@ export function ParentAnalysis() {
       ) : null}
 
       {/* 🔴 misconceptionSummary 는 계약에 원천이 없다(ParentAnalysis 에 필드 자체가 없다). 영구 감춤. */}
-      {false ? (
-      <section className="rounded-card border border-border bg-surface p-4">
-        <h2 className="text-sm font-bold">반복해서 나타난 실수</h2>
-        <div className="mt-3 space-y-2">{(data?.misconceptionSummary ?? []).map((item) => <div key={`${item.area}-${item.label}`} className="flex items-center rounded-xl bg-[#F7F8FA] px-3 py-3 text-sm"><span className="text-muted">{item.area}</span><strong className="ml-2">{item.label}</strong><span className="ml-auto font-bold text-[#E85A4F]">{item.count}건</span></div>)}</div>
-      </section>
-      ) : null}
+      {/* 🔴 「반복해서 나타난 실수」 섹션은 misconceptionSummary 를 쓰는데 계약에 원천이 없다.
+          영구 감춤 — 타입·adapter 는 되살릴 수 있게 남겨 뒀다. */}
 
       <Link href={routeBuilders.parent.newConsultation({ type: "analysis", id: `monthly-analysis-${analysisAsOf}`, label: `${analysisAsOf} 기준 고급 분석`, detail: `지난달 대비 약점 개선도 +${weaknessImprovement}%p · 우선 보완 ${primaryWeakness.area} ${primaryWeakness.score}%` })} className="flex h-[52px] items-center justify-center rounded-xl bg-brand text-sm font-bold text-[#4C3024]">이 분석으로 상담 요청</Link>
     </div>

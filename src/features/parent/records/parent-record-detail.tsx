@@ -89,7 +89,7 @@ export function ParentRecordDetail({ recordId }: { recordId: string }) {
 
       <div className="space-y-2">
         <Link href={ROUTES.parent.analysis} className="flex h-[52px] items-center justify-center rounded-xl border border-[#A9D4F2] bg-surface text-sm font-bold text-[#2F6FA7]">고급 분석 전체 보기</Link>
-        <Link href={routeBuilders.parent.newConsultation({ type: "record", id: record.id, label: record.title, detail: `${record.area} · 정답률 ${record.accuracy}% · 다시 볼 문항 ${detail.reviewCount}개` })} className="flex h-[52px] items-center justify-center rounded-xl bg-brand text-sm font-bold text-[#4C3024]">이 학습기록으로 상담 요청</Link>
+        <Link href={routeBuilders.parent.newConsultation({ type: "record", id: record.id, label: record.title, detail: `${record.area} · 정답률 ${record.accuracy}%` })} className="flex h-[52px] items-center justify-center rounded-xl bg-brand text-sm font-bold text-[#4C3024]">이 학습기록으로 상담 요청</Link>
       </div>
     </div>
   );
@@ -98,7 +98,8 @@ export function ParentRecordDetail({ recordId }: { recordId: string }) {
 function SkillResult({ result }: { result: ParentRecord["detail"]["skillResults"][number] }) {
   const meta = STATUS_META[result.status];
   const iconClass = result.status === "stable" ? "bg-[#E8F6F1] text-[#26856B]" : result.status === "weak" ? "bg-[#FFF0EA] text-[#C9572B]" : "bg-[#F0F2F5] text-subtle";
-  return <div className="flex items-center gap-3 py-3"><span className={`grid size-8 shrink-0 place-items-center rounded-full ${iconClass}`}>{result.status === "stable" ? <CheckCircle2 size={17} /> : result.status === "weak" ? <RotateCcw size={16} /> : <AlertCircle size={16} />}</span><div className="min-w-0 flex-1"><p className="text-sm font-semibold">{result.skill}</p><p className="mt-0.5 text-[11px] text-subtle">채점 {result.questionCount}문항</p></div><div className="text-right"><strong className="text-base">{result.accuracy == null ? "—" : `${result.accuracy}%`}</strong><span className={`ml-2 inline-block rounded-md px-2 py-1 text-[10px] font-bold ${meta.className}`}>{meta.label}</span></div></div>;
+  return <div className="flex items-center gap-3 py-3"><span className={`grid size-8 shrink-0 place-items-center rounded-full ${iconClass}`}>{result.status === "stable" ? <CheckCircle2 size={17} /> : result.status === "weak" ? <RotateCcw size={16} /> : <AlertCircle size={16} />}</span><div className="min-w-0 flex-1"><p className="text-sm font-semibold">{result.skill}</p><p className="mt-0.5 text-[11px] text-subtle">채점 {result.questionCount}문항</p></div><div className="text-right">{/* 🔴 정답률이 없으면 「—」로 채우지 않는다. 그 자리를 렌더링하지 않는다. */}
+    {result.accuracy == null ? null : <strong className="text-base">{`${result.accuracy}%`}</strong>}<span className={`ml-2 inline-block rounded-md px-2 py-1 text-[10px] font-bold ${meta.className}`}>{meta.label}</span></div></div>;
 }
 
 function Metric({ label, value, accent = false, danger = false }: { label: string; value: string; accent?: boolean; danger?: boolean }) { return <div className="rounded-card border border-border bg-surface p-3 text-center"><dd className={`text-lg font-bold ${accent ? "text-action" : danger ? "text-[#E85A4F]" : ""}`}>{value}</dd><dt className="mt-1 text-[11px] text-muted">{label}</dt></div>; }
