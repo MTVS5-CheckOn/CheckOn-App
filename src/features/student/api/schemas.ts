@@ -7,32 +7,32 @@ export { learningRecordDetailSchema, learningRecordSummarySchema };
 export const worksheetSummarySchema = z.object({
   assignmentId: z.string(),
   title: z.string(),
-  areaTag: areaTagSchema.nullable().optional(),
+  areaTag: areaTagSchema.nullish(),
   itemCount: z.number(),
-  estimatedMinutes: z.number().nullable().optional(),
+  estimatedMinutes: z.number().nullish(),
   status: z.enum(["NEW", "IN_PROGRESS", "COMPLETED"]),
-  publishedAt: z.string().optional(),
+  publishedAt: z.string().nullish(),
   teacher: teacherSummarySchema,
-  latestAttemptId: z.string().nullable().optional(),
+  latestAttemptId: z.string().nullish(),
   /** 🔴 COMPLETED 일 때만. 0~1. */
-  accuracyRate: z.number().nullable().optional(),
+  accuracyRate: z.number().nullish(),
 });
 
 export const worksheetDetailSchema = worksheetSummarySchema.extend({
-  description: z.string().nullable().optional(),
+  description: z.string().nullish(),
 });
 
 export const studentHomeSchema = z.object({
   studentName: z.string(),
   /** 진행 중 attempt 가 있는 학습지. 없으면 null. */
-  continuing: worksheetSummarySchema.nullable().optional(),
+  continuing: worksheetSummarySchema.nullish(),
   todayWorksheets: z.array(worksheetSummarySchema),
   weakness: z.object({
     status: valueStatusSchema,
-    areaTag: areaTagSchema.nullable().optional(),
-    typeTag: typeTagSchema.nullable().optional(),
-    accuracyRate: z.number().nullable().optional(),
-  }).nullable().optional(),
+    areaTag: areaTagSchema.nullish(),
+    typeTag: typeTagSchema.nullish(),
+    accuracyRate: z.number().nullish(),
+  }).nullish(),
 });
 
 export const studentProfileSchema = z.object({
@@ -41,23 +41,23 @@ export const studentProfileSchema = z.object({
   name: z.string(),
   grade: z.number(),
   activationStatus: z.enum(["PENDING_PARENT_LINK", "ACTIVE", "DEACTIVATED"]),
-  parentLinked: z.boolean().optional(),
+  parentLinked: z.boolean().nullish(),
   teachers: z.array(teacherSummarySchema),
   notificationsEnabled: z.boolean(),
 });
 
 export const studentQuestionSchema = z.object({
   questionId: z.string(),
-  assignmentId: z.string().optional(),
-  itemId: z.string().nullable().optional(),
-  itemOrdinal: z.number().nullable().optional(),
-  worksheetTitle: z.string().optional(),
+  assignmentId: z.string().nullish(),
+  itemId: z.string().nullish(),
+  itemOrdinal: z.number().nullish(),
+  worksheetTitle: z.string().nullish(),
   title: z.string(),
   /** 🔴 강사가 답해야 ANSWERED 가 된다. WAITING 은 정상 상태다. */
   status: z.enum(["WAITING", "ANSWERED", "FOLLOW_UP"]),
   createdAt: z.string(),
-  answeredAt: z.string().nullable().optional(),
-  teacher: teacherSummarySchema.optional(),
+  answeredAt: z.string().nullish(),
+  teacher: teacherSummarySchema.nullish(),
 });
 
 export const studentQuestionDetailSchema = studentQuestionSchema.extend({
@@ -74,7 +74,7 @@ export const studentQuestionDetailSchema = studentQuestionSchema.extend({
 export const inviteVerificationSchema = z.object({
   valid: z.boolean(),
   teacher: teacherSummarySchema,
-  expiresAt: z.string().optional(),
+  expiresAt: z.string().nullish(),
 });
 
 export const worksheetPageSchema = cursorPageSchema(worksheetSummarySchema);

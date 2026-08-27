@@ -78,9 +78,12 @@ export const endpoints = {
     learningRecords: (studentId: string) => `${PARENT}/children/${encode(studentId)}/learning-records`,
     learningRecord: (studentId: string, recordId: string) =>
       `${PARENT}/children/${encode(studentId)}/learning-records/${encode(recordId)}`,
-    analysis: (studentId: string) => `${PARENT}/children/${encode(studentId)}/analysis`,
-    analysisWeakness: (studentId: string, areaTag: string, typeTag: string) =>
-      `${PARENT}/children/${encode(studentId)}/analysis/weaknesses/${encode(areaTag)}/${encode(typeTag)}`,
+    /** 🔴 `month`(YYYY-MM)는 계약상 **필수 query 파라미터**다. 빠지면 400 INVALID_REQUEST 다. */
+    analysis: (studentId: string, month: string) =>
+      `${PARENT}/children/${encode(studentId)}/analysis?month=${encode(month)}`,
+    /** 🔴 여기도 `month` 가 필수다. */
+    analysisWeakness: (studentId: string, areaTag: string, typeTag: string, month: string) =>
+      `${PARENT}/children/${encode(studentId)}/analysis/weaknesses/${encode(areaTag)}/${encode(typeTag)}?month=${encode(month)}`,
     reports: (studentId: string) => `${PARENT}/children/${encode(studentId)}/reports`,
     report: (studentId: string, reportId: string) =>
       `${PARENT}/children/${encode(studentId)}/reports/${encode(reportId)}`,

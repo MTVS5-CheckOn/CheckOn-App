@@ -4,11 +4,17 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { parentGateway } from "@/features/parent/api/gateway";
 import type { ChildRegistrationRequest, CreateConsultationRequest, InviteRegistrationRequest } from "@/features/parent/api/types";
 import { queryKeys } from "@/lib/api/query-keys";
+import { currentMonth } from "@/lib/format/date";
 
 export const useParentHomeQuery = (studentId: string) => useQuery({ queryKey: queryKeys.parent.home(studentId), queryFn: () => parentGateway.getHome(studentId), enabled: Boolean(studentId) });
 export const useParentRecordsQuery = (studentId: string) => useQuery({ queryKey: queryKeys.parent.records(studentId), queryFn: () => parentGateway.listRecords(studentId), select: (page) => page.items, enabled: Boolean(studentId) });
 export const useParentRecordQuery = (studentId: string, recordId: string) => useQuery({ queryKey: queryKeys.parent.record(studentId, recordId), queryFn: () => parentGateway.getRecord(studentId, recordId), enabled: Boolean(studentId && recordId) });
-export const useParentAnalysisQuery = (studentId: string) => useQuery({ queryKey: queryKeys.parent.analysis(studentId), queryFn: () => parentGateway.getAnalysis(studentId), enabled: Boolean(studentId) });
+/** 🔴 month(YYYY-MM)는 계약상 필수다. 기본값은 이번 달. */
+export const useParentAnalysisQuery = (studentId: string, month: string = currentMonth()) => useQuery({
+  queryKey: queryKeys.parent.analysis(studentId, month),
+  queryFn: () => parentGateway.getAnalysis(studentId, month),
+  enabled: Boolean(studentId && month),
+});
 export const useParentReportsQuery = (studentId: string) => useQuery({ queryKey: queryKeys.parent.reports(studentId), queryFn: () => parentGateway.listReports(studentId), select: (page) => page.items, enabled: Boolean(studentId) });
 export const useParentReportQuery = (studentId: string, reportId: string) => useQuery({ queryKey: queryKeys.parent.report(studentId, reportId), queryFn: () => parentGateway.getReport(studentId, reportId), enabled: Boolean(studentId && reportId) });
 export const useParentProfileQuery = () => useQuery({ queryKey: queryKeys.parent.profile(), queryFn: () => parentGateway.getProfile() });

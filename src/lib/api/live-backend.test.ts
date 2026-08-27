@@ -101,6 +101,21 @@ describeLive("실제 백엔드 계약 확인", () => {
     expect(studentRecordPageSchema.safeParse(records.body.data).success).toBe(true);
   });
 
+  it("🔴 분석은 month 없이 부르면 400 이다 — 계약상 필수 query 파라미터다", async () => {
+    const children = await json("/member/parents/me/children", { headers: { Authorization: `Bearer ${parentToken}` } });
+    const studentId = children.body.data.items[0].studentId;
+
+    const withoutMonth = await json(`/member/parents/me/children/${studentId}/analysis`, { headers: { Authorization: `Bearer ${parentToken}` } });
+    expect(withoutMonth.status).toBe(400);
+    expect(withoutMonth.body.error.code).toBe("INVALID_REQUEST");
+
+    const withMonth = await json(`/member/parents/me/children/${studentId}/analysis?month=2026-08`, { headers: { Authorization: `Bearer ${parentToken}` } });
+    expect(withMonth.status).toBe(200);
+    // 🔴 실제 응답이 스키마를 통과해야 한다. calculatedAt: null 같은 값에 502 가 나면 안 된다.
+    const { parentAnalysisSchema } = await import("@/features/parent/api/schemas");
+    expect(parentAnalysisSchema.safeParse(withMonth.body.data).success).toBe(true);
+  });
+
   it("🔴 세션 응답이 계약 모양이다", async () => {
     const { memberSessionSchema } = await import("@/lib/api/schemas");
     const session = await json("/member/auth/session", { headers: { Authorization: `Bearer ${parentToken}` } });

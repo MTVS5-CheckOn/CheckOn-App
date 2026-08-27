@@ -58,7 +58,7 @@ export interface ParentGateway {
   getHome(studentId: string): Promise<ParentHomeResponse>;
   listRecords(studentId: string, query?: ListQuery): Promise<CursorPage<ParentRecord>>;
   getRecord(studentId: string, recordId: string): Promise<ParentRecord | null>;
-  getAnalysis(studentId: string): Promise<ParentAnalysisResponse>;
+  getAnalysis(studentId: string, month: string): Promise<ParentAnalysisResponse>;
   listReports(studentId: string, query?: ListQuery): Promise<CursorPage<ParentReport>>;
   getReport(studentId: string, reportId: string): Promise<ParentReport | null>;
   getProfile(): Promise<ParentProfileResponse>;
@@ -85,7 +85,7 @@ const mockParentGateway: ParentGateway = {
   async getHome() { await wait(); return { ...parentHomeData, recent: parentRecords.slice(0, 2) }; },
   async listRecords() { await wait(); return mockPage(parentRecords); },
   async getRecord(_studentId, recordId) { await wait(); return parentRecords.find((item) => item.id === recordId) ?? null; },
-  async getAnalysis() { await wait(); return parentAnalysis; },
+  async getAnalysis(_studentId, _month) { await wait(); return parentAnalysis; },
   async listReports() { await wait(); return mockPage(parentReports); },
   async getReport(_studentId, reportId) { await wait(); return parentReports.find((item) => item.id === reportId) ?? null; },
   async getProfile() { await wait(); return parentProfile; },
@@ -145,8 +145,8 @@ export const httpParentGateway: ParentGateway = {
       "parent.record",
     )),
 
-  getAnalysis: async (studentId) =>
-    toParentAnalysis(parseApiResponse(parentAnalysisSchema, await apiRequest(endpoints.parent.analysis(studentId)), "parent.analysis")),
+  getAnalysis: async (studentId, month) =>
+    toParentAnalysis(parseApiResponse(parentAnalysisSchema, await apiRequest(endpoints.parent.analysis(studentId, month)), "parent.analysis")),
 
   listReports: async (studentId, query) => {
     const page = parseApiResponse(

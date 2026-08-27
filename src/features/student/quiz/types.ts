@@ -25,7 +25,7 @@ export type AttemptInProgress = {
   status: "IN_PROGRESS";
   /** optimistic lock. progress 요청의 baseVersion 에 넣는다. */
   version: number;
-  startedAt?: string;
+  startedAt?: string | null;
   currentItemId?: string | null;
   totalActiveElapsedSeconds: number;
   /** 🔴 키는 itemId(UUID) 다. `q1` 같은 문자열이 아니다. */
@@ -49,8 +49,8 @@ export type AttemptResult = {
   attemptId: string;
   assignmentId: string;
   status: "SCORED";
-  submittedAt?: string;
-  scoredAt?: string;
+  submittedAt?: string | null;
+  scoredAt?: string | null;
   itemCount: number;
   correctCount: number;
   /** 🔴 0~1 이다. ×100 은 표시 계층에서 한 번만. */
@@ -74,9 +74,9 @@ export type AttemptProgressResult = {
   attemptId: string;
   version: number;
   totalActiveElapsedSeconds: number;
-  savedAt?: string;
+  savedAt?: string | null;
   /** 같은 clientSequence 재전송이라 무시했으면 true. */
-  duplicated?: boolean;
+  duplicated?: boolean | null;
 };
 
 export type AttemptSubmitRequest = {

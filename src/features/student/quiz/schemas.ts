@@ -7,9 +7,9 @@ export const quizQuestionSchema = z.object({
   itemId: z.string(),
   ordinal: z.number(),
   stem: z.string(),
-  passage: z.string().nullable().optional(),
-  areaTag: z.string().nullable().optional(),
-  typeTag: z.string().nullable().optional(),
+  passage: z.string().nullish(),
+  areaTag: z.string().nullish(),
+  typeTag: z.string().nullish(),
   options: z.array(optionSchema),
 });
 
@@ -18,9 +18,9 @@ export const attemptInProgressSchema = z.object({
   assignmentId: z.string(),
   status: z.literal("IN_PROGRESS"),
   version: z.number(),
-  snapshotHash: z.string().optional(),
-  startedAt: z.string().optional(),
-  currentItemId: z.string().nullable().optional(),
+  snapshotHash: z.string().nullish(),
+  startedAt: z.string().nullish(),
+  currentItemId: z.string().nullish(),
   totalActiveElapsedSeconds: z.number(),
   answers: z.record(z.string(), z.number()),
   activeElapsedSecondsByItem: z.record(z.string(), z.number()),
@@ -39,14 +39,14 @@ export const attemptResultSchema = z.object({
   attemptId: z.string(),
   assignmentId: z.string(),
   status: z.literal("SCORED"),
-  submittedAt: z.string().optional(),
-  scoredAt: z.string().optional(),
+  submittedAt: z.string().nullish(),
+  scoredAt: z.string().nullish(),
   itemCount: z.number(),
   /** 🔴 이 필드를 빼면 결과 화면이 서버 채점을 못 읽는다. contract test 가 지킨다. */
   correctCount: z.number(),
   accuracyRate: z.number(),
   totalActiveElapsedSeconds: z.number().default(0),
-  learningRecordId: z.string().nullable().optional(),
+  learningRecordId: z.string().nullish(),
   items: z.array(attemptItemResultSchema),
 });
 
@@ -54,8 +54,8 @@ export const attemptProgressResultSchema = z.object({
   attemptId: z.string(),
   version: z.number(),
   totalActiveElapsedSeconds: z.number(),
-  savedAt: z.string().optional(),
-  duplicated: z.boolean().optional(),
+  savedAt: z.string().nullish(),
+  duplicated: z.boolean().nullish(),
 });
 
 export const attemptSubmittedSchema = z.object({

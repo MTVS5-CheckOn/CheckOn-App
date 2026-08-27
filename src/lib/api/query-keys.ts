@@ -33,9 +33,9 @@ export const queryKeys = {
     home: (studentId: string) => [...queryKeys.parent.all, "home", studentId] as const,
     records: (studentId: string, params?: ListParams) => [...queryKeys.parent.all, "records", studentId, list(params)] as const,
     record: (studentId: string, recordId: string) => [...queryKeys.parent.all, "records", studentId, recordId] as const,
-    analysis: (studentId: string) => [...queryKeys.parent.all, "analysis", studentId] as const,
-    analysisWeakness: (studentId: string, areaTag: string, typeTag: string) =>
-      [...queryKeys.parent.all, "analysis", studentId, "weaknesses", areaTag, typeTag] as const,
+    analysis: (studentId: string, month: string) => [...queryKeys.parent.all, "analysis", studentId, month] as const,
+    analysisWeakness: (studentId: string, areaTag: string, typeTag: string, month: string) =>
+      [...queryKeys.parent.all, "analysis", studentId, "weaknesses", areaTag, typeTag, month] as const,
     reports: (studentId: string, params?: ListParams) => [...queryKeys.parent.all, "reports", studentId, list(params)] as const,
     report: (studentId: string, reportId: string) => [...queryKeys.parent.all, "reports", studentId, reportId] as const,
     consultations: (studentId: string, params?: ListParams) => [...queryKeys.parent.all, "consultations", studentId, list(params)] as const,

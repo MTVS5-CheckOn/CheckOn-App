@@ -14,3 +14,11 @@ export function getTodayLearningDate(now = new Date()) {
   const day = value("day");
   return { date: `${year}.${month}.${day}`, month: `${year}-${month}` };
 }
+
+/**
+ * 계약의 월 형식 `YYYY-MM` (member-api.yaml `pattern: ^\d{4}-\d{2}$`).
+ * 🔴 분석 엔드포인트의 `month` 는 **필수 query 파라미터**다. 빠지면 400 이다.
+ */
+export function currentMonth(date: Date = new Date()) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}

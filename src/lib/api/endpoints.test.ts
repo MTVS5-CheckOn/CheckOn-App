@@ -46,6 +46,18 @@ describe("API 경로 단일 출처", () => {
     expect(endpoints.parent.home("a/b")).toContain("a%2Fb");
   });
 
+  it("🔴 분석 경로는 필수 query 파라미터 month 를 반드시 붙인다", () => {
+    // 실측: month 없이 부르면 백엔드가 400 INVALID_REQUEST 를 낸다
+    // (details: [{field: "month", reason: "required"}]). 계약 required: true.
+    expect(endpoints.parent.analysis("s1", "2026-08")).toBe("/member/parents/me/children/s1/analysis?month=2026-08");
+    expect(endpoints.parent.analysisWeakness("s1", "reading", "concept", "2026-08"))
+      .toBe("/member/parents/me/children/s1/analysis/weaknesses/reading/concept?month=2026-08");
+    // month 를 빠뜨릴 수 없도록 인자에 들어 있어야 한다.
+    for (const build of [endpoints.parent.analysis, endpoints.parent.analysisWeakness]) {
+      expect(build.length).toBeGreaterThanOrEqual(2);
+    }
+  });
+
   it("계약이 이름을 바꾼 세 곳을 지킨다", () => {
     // follow-ups → messages, notifications → notification-preference
     expect(endpoints.student.questionMessages("q")).toBe("/member/students/me/questions/q/messages");

@@ -80,7 +80,7 @@ export function toDisplayDate(instant: string) {
   return Number.isNaN(date.getTime()) ? "" : `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())}`;
 }
 
-function toElapsed(seconds: number | undefined) {
+function toElapsed(seconds: number | null | undefined) {
   if (seconds == null) return "";
   const minutes = Math.floor(seconds / 60);
   return `${minutes}분`;

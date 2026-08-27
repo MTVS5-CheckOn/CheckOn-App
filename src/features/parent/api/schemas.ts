@@ -11,97 +11,97 @@ export const childSchema = z.object({
   studentId: z.string(),
   studentPublicId: z.string(),
   name: z.string(),
-  grade: z.number().nullable().optional(),
+  grade: z.number().nullish(),
   activationStatus: activationStatusSchema,
-  linkedAt: z.string().optional(),
-  teachers: z.array(teacherSummarySchema).optional(),
+  linkedAt: z.string().nullish(),
+  teachers: z.array(teacherSummarySchema).nullish(),
 });
 
 export const learningRecordSummarySchema = z.object({
   recordId: z.string(),
-  assignmentId: z.string().nullable().optional(),
-  attemptId: z.string().nullable().optional(),
+  assignmentId: z.string().nullish(),
+  attemptId: z.string().nullish(),
   title: z.string(),
   occurredAt: z.string(),
-  month: z.string().optional(),
-  areaTag: areaTagSchema.nullable().optional(),
+  month: z.string().nullish(),
+  areaTag: areaTagSchema.nullish(),
   itemCount: z.number(),
   correctCount: z.number(),
   /** 🔴 0~1 이다. ×100 은 표시 계층에서 한 번만. */
   accuracyRate: z.number(),
-  totalActiveElapsedSeconds: z.number().optional(),
-  teacher: teacherSummarySchema.optional(),
+  totalActiveElapsedSeconds: z.number().nullish(),
+  teacher: teacherSummarySchema.nullish(),
 });
 
 export const attemptItemResultSchema = z.object({
   itemId: z.string(),
-  itemNo: z.number().optional(),
-  stem: z.string().optional(),
-  selectedNo: z.number().nullable().optional(),
-  correctNo: z.number().nullable().optional(),
-  correct: z.boolean().nullable().optional(),
-  explanation: z.string().nullable().optional(),
-  activeElapsedSeconds: z.number().optional(),
-  areaTag: areaTagSchema.nullable().optional(),
-  typeTag: typeTagSchema.nullable().optional(),
+  itemNo: z.number().nullish(),
+  stem: z.string().nullish(),
+  selectedNo: z.number().nullish(),
+  correctNo: z.number().nullish(),
+  correct: z.boolean().nullish(),
+  explanation: z.string().nullish(),
+  activeElapsedSeconds: z.number().nullish(),
+  areaTag: areaTagSchema.nullish(),
+  typeTag: typeTagSchema.nullish(),
 });
 
 export const learningRecordDetailSchema = learningRecordSummarySchema.extend({
   items: z.array(attemptItemResultSchema),
   weakness: z.object({
     status: valueStatusSchema,
-    areaTag: areaTagSchema.nullable().optional(),
-    typeTag: typeTagSchema.nullable().optional(),
-    description: z.string().nullable().optional(),
+    areaTag: areaTagSchema.nullish(),
+    typeTag: typeTagSchema.nullish(),
+    description: z.string().nullish(),
   }),
   // 🔴 실제 집계 결과만 온다. 값이 없으면 빈 배열이고 지어내지 않는다.
   trend: z.array(z.object({
     month: z.string(),
     accuracyRate: z.number().nullable(),
     status: valueStatusSchema,
-  })).optional(),
+  })).nullish(),
 });
 
 const improvementSchema = z.object({
   status: z.enum(["AVAILABLE", "NO_PREVIOUS_PERIOD", "INSUFFICIENT_SAMPLE", "NO_DATA"]),
-  previousAccuracyRate: z.number().nullable().optional(),
+  previousAccuracyRate: z.number().nullish(),
   /** 퍼센트포인트. 43%→51% 는 8.0. */
-  accuracyDeltaPp: z.number().nullable().optional(),
-  minimumSampleSize: z.number().optional(),
+  accuracyDeltaPp: z.number().nullish(),
+  minimumSampleSize: z.number().nullish(),
 });
 
 export const weaknessCellSchema = z.object({
   areaTag: areaTagSchema,
   typeTag: typeTagSchema,
   status: valueStatusSchema,
-  scoredCount: z.number().optional(),
-  correctCount: z.number().optional(),
-  accuracyRate: z.number().nullable().optional(),
-  improvement: improvementSchema.optional(),
+  scoredCount: z.number().nullish(),
+  correctCount: z.number().nullish(),
+  accuracyRate: z.number().nullish(),
+  improvement: improvementSchema.nullish(),
 });
 
 export const reportSummarySchema = z.object({
   reportId: z.string(),
   reportMonth: z.string(),
-  revision: z.number().optional(),
+  revision: z.number().nullish(),
   status: z.literal("PUBLISHED"),
   publishedAt: z.string(),
   teacher: teacherSummarySchema,
   /** 🔴 PDF 는 아직 연결되지 않았다. false 가 계약상 정상이다. */
-  hasPdf: z.boolean().optional(),
+  hasPdf: z.boolean().nullish(),
 });
 
 export const reportDetailSchema = reportSummarySchema.extend({
-  snapshotVersion: z.string().optional(),
+  snapshotVersion: z.string().nullish(),
   sections: z.array(z.object({
     kind: z.string(),
-    title: z.string().optional(),
+    title: z.string().nullish(),
     status: valueStatusSchema,
-    body: z.string().nullable().optional(),
-    data: z.record(z.string(), z.unknown()).nullable().optional(),
-    evidenceRefs: z.array(z.string()).optional(),
+    body: z.string().nullish(),
+    data: z.record(z.string(), z.unknown()).nullish(),
+    evidenceRefs: z.array(z.string()).nullish(),
     // status 가 NOT_PRODUCED 일 때의 사유. 전국 백분위는 항상 여기에 해당한다.
-    unproducedReason: z.string().nullable().optional(),
+    unproducedReason: z.string().nullish(),
   })),
 });
 
@@ -110,34 +110,34 @@ export const reportFileAccessSchema = z.object({
   url: z.string(),
   expiresAt: z.string(),
   contentType: z.literal("application/pdf"),
-  checksum: z.string().optional(),
-  sizeBytes: z.number().optional(),
-  pageCount: z.number().nullable().optional(),
+  checksum: z.string().nullish(),
+  sizeBytes: z.number().nullish(),
+  pageCount: z.number().nullish(),
 });
 
 export const parentAnalysisSchema = z.object({
   month: z.string(),
-  calculationVersion: z.string().optional(),
-  calculatedAt: z.string().optional(),
+  calculationVersion: z.string().nullish(),
+  calculatedAt: z.string().nullish(),
   overall: z.object({
     status: valueStatusSchema,
-    accuracyRate: z.number().nullable().optional(),
-    scoredCount: z.number().nullable().optional(),
-    averageActiveSeconds: z.number().nullable().optional(),
+    accuracyRate: z.number().nullish(),
+    scoredCount: z.number().nullish(),
+    averageActiveSeconds: z.number().nullish(),
   }),
   accuracyTrend: z.array(z.object({
     month: z.string(),
-    accuracyRate: z.number().nullable().optional(),
+    accuracyRate: z.number().nullish(),
     status: valueStatusSchema,
-  })).optional(),
+  })).nullish(),
   areaScores: z.array(z.object({
     areaTag: areaTagSchema,
-    accuracyRate: z.number().nullable().optional(),
-    scoredCount: z.number().optional(),
+    accuracyRate: z.number().nullish(),
+    scoredCount: z.number().nullish(),
     status: valueStatusSchema,
-  })).optional(),
+  })).nullish(),
   weaknessRanking: z.array(weaknessCellSchema),
-  primaryWeakness: weaknessCellSchema.nullable().optional(),
+  primaryWeakness: weaknessCellSchema.nullish(),
 });
 
 export const parentHomeSchema = z.object({
@@ -145,24 +145,24 @@ export const parentHomeSchema = z.object({
   metrics: z.array(z.object({
     key: z.enum(["MONTHLY_ACCURACY", "SOLVED_COUNT", "AVERAGE_DURATION_SEC", "WEAKNESS_DELTA_PP"]),
     status: valueStatusSchema,
-    value: z.number().nullable().optional(),
-    unit: z.enum(["RATIO", "COUNT", "SECONDS", "PERCENTAGE_POINT"]).nullable().optional(),
+    value: z.number().nullish(),
+    unit: z.enum(["RATIO", "COUNT", "SECONDS", "PERCENTAGE_POINT"]).nullish(),
   })),
-  latestReport: reportSummarySchema.nullable().optional(),
-  recentRecords: z.array(learningRecordSummarySchema).optional(),
+  latestReport: reportSummarySchema.nullish(),
+  recentRecords: z.array(learningRecordSummarySchema).nullish(),
 });
 
 export const consultationSchema = z.object({
   consultationId: z.string(),
   studentId: z.string(),
   teacherId: z.string(),
-  childName: z.string().optional(),
-  teacherName: z.string().optional(),
+  childName: z.string().nullish(),
+  teacherName: z.string().nullish(),
   status: z.enum(["SUBMITTED", "REVIEWING", "ANSWERED", "CLOSED", "CANCELLED"]),
   createdAt: z.string(),
-  updatedAt: z.string().optional(),
-  answeredAt: z.string().nullable().optional(),
-  aiAssistance: z.enum(["NOT_REQUESTED", "PENDING", "READY", "TEMPLATE_ONLY", "REJECTED_INSUFFICIENT", "UNAVAILABLE"]).optional(),
+  updatedAt: z.string().nullish(),
+  answeredAt: z.string().nullish(),
+  aiAssistance: z.enum(["NOT_REQUESTED", "PENDING", "READY", "TEMPLATE_ONLY", "REJECTED_INSUFFICIENT", "UNAVAILABLE"]).nullish(),
 });
 
 export const consultationDetailSchema = consultationSchema.extend({
@@ -180,19 +180,19 @@ export const notificationSchema = z.object({
   notificationId: z.string(),
   type: z.enum(["REPORT_PUBLISHED", "CONSULTATION_ANSWERED", "QUESTION_ANSWERED", "LEARNING_SUBMITTED", "CHILD_LINKED"]),
   title: z.string(),
-  body: z.string().nullable().optional(),
+  body: z.string().nullish(),
   createdAt: z.string(),
   read: z.boolean(),
   target: z.object({
-    studentId: z.string().nullable().optional(),
-    resourceId: z.string().nullable().optional(),
-  }).nullable().optional(),
+    studentId: z.string().nullish(),
+    resourceId: z.string().nullish(),
+  }).nullish(),
 });
 
 export const parentProfileSchema = z.object({
   parentId: z.string(),
   name: z.string(),
-  email: z.string().optional(),
+  email: z.string().nullish(),
   children: z.array(childSchema),
   teachers: z.array(teacherSummarySchema),
   notificationsEnabled: z.boolean(),
@@ -201,16 +201,16 @@ export const parentProfileSchema = z.object({
 export const childVerificationSchema = z.object({
   registrable: z.boolean(),
   /** 🔴 부분 마스킹된 이름만 반환한다 (예 `김*수`). */
-  name: z.string().nullable().optional(),
-  grade: z.number().nullable().optional(),
-  reason: z.enum(["ALREADY_LINKED", "NOT_FOUND"]).nullable().optional(),
+  name: z.string().nullish(),
+  grade: z.number().nullish(),
+  reason: z.enum(["ALREADY_LINKED", "NOT_FOUND"]).nullish(),
 });
 
 export const childRegistrationResultSchema = z.object({ child: childSchema });
 export const inviteVerificationSchema = z.object({
   valid: z.boolean(),
   teacher: teacherSummarySchema,
-  expiresAt: z.string().optional(),
+  expiresAt: z.string().nullish(),
 });
 
 export const parentRecordPageSchema = cursorPageSchema(learningRecordSummarySchema);
