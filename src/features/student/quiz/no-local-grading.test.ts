@@ -82,3 +82,19 @@ describe("🔴 zod 스키마에 .strict() 를 쓰지 않는다", () => {
     }
   });
 });
+
+/**
+ * 🔴 계약 suite 가 한쪽에만 걸리는 파괴는 **종료 코드로 잡히지 않는다.**
+ * 테스트가 조용히 줄어들 뿐이라 `pnpm test` 는 exit 0 을 낸다.
+ * 그래서 등록 자체를 단언한다 — 개수 비교에 기대지 않는다.
+ */
+describe("🔴 gateway 계약 suite 는 mock·HTTP 양쪽에 걸려 있어야 한다", () => {
+  it("quiz gateway 계약이 두 번 등록된다", () => {
+    const code = source("src/features/student/quiz/quiz-gateway.test.ts");
+    const registrations = code.match(/runQuizGatewayContract\(/g) ?? [];
+    // 한쪽만 걸면 mock 과 HTTP 가 갈라져도 아무도 모른다.
+    expect(registrations.length).toBe(2);
+    expect(code).toMatch(/runQuizGatewayContract\("mock"/);
+    expect(code).toMatch(/runQuizGatewayContract\("http"/);
+  });
+});
