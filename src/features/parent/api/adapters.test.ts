@@ -3,6 +3,7 @@ import {
   areaLabel,
   consultationStatusOf,
   notificationTypeOf,
+  toChild,
   toParentAnalysis,
   toParentConsultationDetail,
   toParentHome,
@@ -81,6 +82,16 @@ describe("계약 → 도메인 adapter", () => {
     expect(report.month).toBe(8);
     // 🔴 academyName 은 계약에 없다. 강사 이름만 쓴다.
     expect(report.teacher).toBe("박지은 선생님");
+  });
+
+  it("🔴 자녀 이름이 null 이어도 화면 전체가 죽지 않는다 (계약 required, 실제 null)", () => {
+    // 시연 시드에서 자녀 4명 중 2명이 name: null 이었다.
+    // required 로 두면 학부모 내 정보 화면 전체가 502 로 죽는다 — 한 행 때문에 화면을 잃는다.
+    const child = toChild({ studentId: "s1", studentPublicId: "STU-A", name: null, activationStatus: "ACTIVE" });
+    // 🔴 지어내지 않는다. 빈 문자열로 두고 화면이 그 자리를 렌더링하지 않는다.
+    expect(child.name).toBe("");
+    expect(child.studentId).toBe("STU-A");
+    expect(child.active).toBe(true);
   });
 
   it("🔴 보고서 상세의 sections 를 버리지 않는다 — 버리면 거짓 빈 상태가 뜬다", () => {

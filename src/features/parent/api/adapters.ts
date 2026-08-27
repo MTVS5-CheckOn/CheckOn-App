@@ -183,7 +183,8 @@ function metricValue(metric: HomeDto["metrics"][number]) {
 
 export function toParentHome(dto: HomeDto): ParentHomeResponse {
   return {
-    student: { id: dto.child.studentId, name: dto.child.name, period: "" },
+    // 🔴 이름이 없으면 빈 문자열. 화면이 그 자리를 렌더링하지 않는다.
+    student: { id: dto.child.studentId, name: dto.child.name ?? "", period: "" },
     metrics: dto.metrics.map((metric) => ({
       label: METRIC_LABELS[metric.key] ?? metric.key,
       value: metricValue(metric),
@@ -325,7 +326,8 @@ export function toChild(dto: ChildDto) {
   return {
     id: dto.studentId,
     studentId: dto.studentPublicId,
-    name: dto.name,
+    // 🔴 이름이 없으면 빈 문자열로 두고 화면이 그 자리를 렌더링하지 않는다. 지어내지 않는다.
+    name: dto.name ?? "",
     grade: dto.grade == null ? "" : `고${dto.grade}`,
     active: dto.activationStatus === "ACTIVE",
   };

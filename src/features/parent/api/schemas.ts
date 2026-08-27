@@ -10,7 +10,15 @@ export const activationStatusSchema = z.enum(["PENDING_PARENT_LINK", "ACTIVE", "
 export const childSchema = z.object({
   studentId: z.string(),
   studentPublicId: z.string(),
-  name: z.string(),
+  /**
+   * 🔴 계약은 `name` 을 required 로 선언하는데(member-api.yaml:2097) 실제 응답에 `null` 이 온다.
+   * 시연 시드에서 자녀 4명 중 2명이 그렇다. 스키마를 required 로 두면
+   * **학부모 내 정보 화면 전체가 502 로 죽는다** — 한 행 때문에 화면을 잃는다.
+   * 그래서 null 을 받아들이되, 값을 지어내지 않고 화면에서 그 자리를 렌더링하지 않는다.
+   * 🔴 계약과 실제가 다른 지점이다. 백엔드가 name 을 채우거나 계약을 nullable 로
+   *    바꾸거나 둘 중 하나로 정해야 한다 (readiness 「판단 필요」에 등재).
+   */
+  name: z.string().nullable(),
   grade: z.number().nullish(),
   activationStatus: activationStatusSchema,
   linkedAt: z.string().nullish(),
