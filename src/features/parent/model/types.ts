@@ -114,7 +114,8 @@ export type ParentProfileResponse = {
   name: string;
   maskedPhone: string;
   notificationsEnabled: boolean;
-  children: { id: string; studentId: string; name: string; grade: string; active: boolean }[];
+  /** 🔴 studentId 는 UUID(경로용), studentPublicId 는 사용자에게 보이는 값. */
+  children: { studentId: string; studentPublicId: string; name: string; grade: string; active: boolean }[];
   /** 🔴 `academy` 는 계약에 없다(백엔드 teacher_profiles 에 원본이 없음). `subject` 도 현재 항상 null. */
   teachers: { id: string; name: string; subject: string | null }[];
 };

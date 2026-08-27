@@ -57,7 +57,7 @@ export function NewConsultationForm() {
   return <form onSubmit={handleSubmit(submit)} className="space-y-4 px-5 py-5">
     {context ? <ConsultationContextCard context={context} removable onRemove={() => setContext(undefined)} /> : null}
     <section className="rounded-card border border-border bg-surface p-4 shadow-[var(--checkon-shadow-card)]">
-      <label className="text-sm font-bold">상담할 자녀<select {...register("studentId")} className="mt-2 h-[52px] w-full rounded-xl border border-border bg-surface px-3 text-sm outline-none focus:border-action">{children.map((child) => <option key={child.id} value={child.studentId}>{child.name} · {child.grade}</option>)}</select></label>
+      <label className="text-sm font-bold">상담할 자녀<select {...register("studentId")} className="mt-2 h-[52px] w-full rounded-xl border border-border bg-surface px-3 text-sm outline-none focus:border-action">{children.map((child) => <option key={child.studentId} value={child.studentId}>{child.name} · {child.grade}</option>)}</select></label>
       {errors.studentId ? <p className="mt-1.5 text-xs text-[#D64545]">{errors.studentId.message}</p> : null}
       <label className="mt-4 block text-sm font-bold">담당 선생님<select {...register("teacherId")} className="mt-2 h-[52px] w-full rounded-xl border border-border bg-surface px-3 text-sm outline-none focus:border-action"><option value="">선생님을 선택하세요</option>{teachers.map((teacher) => <option key={teacher.id} value={teacher.id}>{teacher.name}</option>)}</select></label>
       {/* 🔴 등록된 선생님이 없으면 상담을 만들 수 없다. 임의 기본값을 넣지 않고 안내한다. */}

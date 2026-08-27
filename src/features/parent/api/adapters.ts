@@ -327,8 +327,9 @@ export function toParentProfile(dto: ProfileDto): ParentProfileResponse {
 
 export function toChild(dto: ChildDto) {
   return {
-    id: dto.studentId,
-    studentId: dto.studentPublicId,
+    // 🔴 계약 어휘 그대로: studentId 는 UUID(경로용), studentPublicId 는 사용자에게 보이는 값.
+    studentId: dto.studentId,
+    studentPublicId: dto.studentPublicId,
     // 🔴 이름이 없으면 빈 문자열로 두고 화면이 그 자리를 렌더링하지 않는다. 지어내지 않는다.
     name: dto.name ?? "",
     grade: dto.grade == null ? "" : `고${dto.grade}`,

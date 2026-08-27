@@ -115,7 +115,7 @@ const mockParentGateway: ParentGateway = {
     if (studentPublicId !== "STU-B52D") return { registrable: false, name: null, grade: null, reason: "NOT_FOUND" };
     return { registrable: true, name: "김*준", grade: 1, reason: null };
   },
-  async registerChild({ studentPublicId }) { await wait(300); return { id: "student-2", studentId: studentPublicId, name: "김서준", grade: "고1", active: true }; },
+  async registerChild({ studentPublicId }) { await wait(300); return { studentId: "student-2", studentPublicId, name: "김서준", grade: "고1", active: true }; },
   async registerInvite({ code }) {
     await wait(300);
     // 🔴 계약 코드로 던진다. INVITE_INVALID·INVITE_ALREADY_USED 는 계약에 없는 이름이었다.

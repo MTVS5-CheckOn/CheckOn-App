@@ -90,8 +90,11 @@ describe("계약 → 도메인 adapter", () => {
     const child = toChild({ studentId: "s1", studentPublicId: "STU-A", name: null, activationStatus: "ACTIVE" });
     // 🔴 지어내지 않는다. 빈 문자열로 두고 화면이 그 자리를 렌더링하지 않는다.
     expect(child.name).toBe("");
-    expect(child.studentId).toBe("STU-A");
     expect(child.active).toBe(true);
+    // 🔴 studentId 는 UUID(API 경로용), studentPublicId 는 사용자에게 보이는 값이다.
+    //    이 둘이 뒤바뀌면 화면이 공개 ID 를 경로에 넣어 400 type mismatch 가 난다.
+    expect(child.studentId).toBe("s1");
+    expect(child.studentPublicId).toBe("STU-A");
   });
 
   it("🔴 보고서 상세의 sections 를 버리지 않는다 — 버리면 거짓 빈 상태가 뜬다", () => {

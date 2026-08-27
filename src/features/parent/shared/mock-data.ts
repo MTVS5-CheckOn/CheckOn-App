@@ -30,7 +30,7 @@ export const parentAnalysis: ParentAnalysisResponse = {
   primaryWeakness: { area: "독서", skill: "개념·지식", score: 43, description: "최근 4주 집중 보완 필요", studyFrequency: "주 1~2회 (비중 낮음)", averageTime: "문항당 3.2분 (전체 평균 2.1분)", evidenceQuestionCount: 12, previousMonthScore: 31, repeatedMistakeCount: 3, misconception: "범위 혼동", linkedWeaknesses: [{ label: "독서 · 사실 확인", relationScore: 72 }, { label: "문학 · 비판·평가", relationScore: 58 }], nextAction: "주 1회 10문항 내외의 짧은 보완 학습으로 개념 적용과 근거 범위를 함께 확인합니다.", relatedRecordId: "l3" },
 };
 
-export const parentProfile: ParentProfileResponse = { id: "parent-1", name: "이순영", maskedPhone: "010-XXXX-5678", notificationsEnabled: true, children: [{ id: "student-1", studentId: "STU-A41C", name: "김민준", grade: "고2", active: true }], teachers: [{ id: "teacher-1", name: "박지은 선생님", subject: null }] };
+export const parentProfile: ParentProfileResponse = { id: "parent-1", name: "이순영", maskedPhone: "010-XXXX-5678", notificationsEnabled: true, children: [{ studentId: "student-1", studentPublicId: "STU-A41C", name: "김민준", grade: "고2", active: true }], teachers: [{ id: "teacher-1", name: "박지은 선생님", subject: null }] };
 
 export const parentNotifications: ParentNotification[] = [
   { id: "notification-1", type: "report", title: "8월 월별 보고서가 도착했어요", body: "박지은 선생님이 김민준 학생의 보고서를 발행했습니다.", createdAt: "오늘 14:20", read: false, href: "/parent/reports/r1" },

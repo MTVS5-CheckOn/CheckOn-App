@@ -4,7 +4,7 @@ export type { ParentAnalysisResponse, ParentHomeResponse, ParentNotification, Pa
 
 /** 🔴 계약은 공개 학생 ID(`studentPublicId`)를 받는다. */
 export type ChildRegistrationRequest = { studentPublicId: string };
-export type ChildRegistrationResponse = { id: string; studentId: string; name: string; grade: string; active: boolean };
+export type ChildRegistrationResponse = { studentId: string; studentPublicId: string; name: string; grade: string; active: boolean };
 
 /** 🔴 사전 확인은 안내일 뿐 등록을 보장하지 않는다. 이름은 부분 마스킹된다. */
 export type ChildVerificationResult = {
