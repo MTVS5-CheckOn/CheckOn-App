@@ -9,16 +9,23 @@ const INITIAL_CONSULTATIONS: ParentConsultation[] = [
   {
     id: "consultation-1",
     studentId: "STU-A41C",
+    teacherId: "teacher-1",
     childName: "김민준",
     teacherName: "박지은 선생님",
     content: "8월 보고서를 기준으로 독서 영역을 어떤 순서로 보완하면 좋을지 궁금합니다.",
-    responseMethod: "app",
     context: { type: "report", id: "r1", label: "2026년 8월 월별 보고서", detail: "독서 · 개념/지식 정답률 43%" },
     status: "answered",
     createdAt: "2026.08.20 10:14",
     updatedAt: "2026.08.20 16:30",
-    teacherAnswer: "이번 달에는 독서 개념어를 먼저 정리한 뒤, 짧은 지문에서 근거 문장을 찾는 연습을 진행하려고 합니다. 다음 학습지부터 보완 문항을 함께 제공하겠습니다.",
     answeredAt: "2026.08.20 16:30",
+    messages: [
+      {
+        id: "message-1",
+        authorRole: "teacher",
+        content: "이번 달에는 독서 개념어를 먼저 정리한 뒤, 짧은 지문에서 근거 문장을 찾는 연습을 진행하려고 합니다. 다음 학습지부터 보완 문항을 함께 제공하겠습니다.",
+        publishedAt: "2026.08.20 16:30",
+      },
+    ],
   },
 ];
 
@@ -54,6 +61,8 @@ export const useParentConsultationStore = create<ConsultationState>()(persist((s
       status: "submitted",
       createdAt,
       updatedAt: createdAt,
+      // 🔴 강사가 답해야 채워진다. 접수 직후 빈 배열이 정상이다.
+      messages: [],
     };
     set((state) => ({ consultations: [consultation, ...state.consultations] }));
     return consultation;

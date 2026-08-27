@@ -4,7 +4,8 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export type ParentChild = { id: string; studentId: string; name: string; grade: string; active: boolean };
-export type ParentTeacher = { id: string; name: string; academy: string };
+/** 🔴 `academy` 는 계약(TeacherSummary)에 없다. 백엔드에 원본이 없어 지어내지 않는다. */
+export type ParentTeacher = { id: string; name: string; subject: string | null };
 
 type ParentState = {
   children: ParentChild[];
@@ -20,7 +21,7 @@ type ParentState = {
 };
 
 const DEFAULT_CHILD: ParentChild = { id: "student-1", studentId: "STU-A41C", name: "김민준", grade: "고2", active: true };
-const DEFAULT_TEACHER: ParentTeacher = { id: "teacher-1", name: "박지은 선생님", academy: "한울국어학원" };
+const DEFAULT_TEACHER: ParentTeacher = { id: "teacher-1", name: "박지은 선생님", subject: null };
 
 export const useParentStore = create<ParentState>()(persist((set) => ({
   children: [DEFAULT_CHILD],

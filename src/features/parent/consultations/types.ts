@@ -6,25 +6,38 @@ export type ConsultationContext = {
   detail?: string;
 };
 
+export type ConsultationMessage = {
+  id: string;
+  authorRole: "parent" | "teacher";
+  content: string;
+  publishedAt: string;
+};
+
 export type ParentConsultation = {
   id: string;
   studentId: string;
+  /** 🔴 계약상 필수다. 화면이 담당 강사를 골라야 한다. */
+  teacherId: string;
   childName: string;
   teacherName: string;
   content: string;
-  responseMethod: "app";
   context?: ConsultationContext;
   status: ConsultationStatus;
   createdAt: string;
   updatedAt: string;
-  teacherAnswer?: string;
   answeredAt?: string;
+  /**
+   * 🔴 강사가 승인·발행한 메시지만 온다.
+   * 답변 전에는 빈 배열이 **정상**이다 — 오류로 다루지 않는다.
+   */
+  messages: ConsultationMessage[];
 };
 
 export type ConsultationDraft = {
   studentId: string;
+  /** 🔴 계약 CreateConsultationRequest 의 required 필드. 임의 기본값을 넣지 않는다. */
+  teacherId: string;
   content: string;
-  responseMethod: "app";
   context?: ConsultationContext;
 };
 

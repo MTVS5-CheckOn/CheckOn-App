@@ -88,7 +88,6 @@ export type ParentReport = {
   month: number;
   studentName: string;
   teacher: string;
-  pages: number;
   issuedAt: string;
   isNew: boolean;
   studyPeriod: string;
@@ -102,7 +101,12 @@ export type ParentReport = {
   };
   teacherComment: string;
   sections: { title: string; description: string; status: "available" | "insufficient" }[];
-  pdf: { url: string; pageImageBasePath: string; pageLabels: string[] };
+  /**
+   * 🔴 PDF 는 아직 연결되지 않았다. `false` 가 계약상 정상 상태다.
+   * 실제 파일은 POST .../reports/{id}/file-access 가 주는 수명 짧은 signed URL 로 연다
+   * (`parent/api/file-gateway.ts`). URL 을 도메인 타입에 담아 캐시하지 않는다.
+   */
+  hasPdf: boolean;
 };
 
 export type ParentProfileResponse = {
@@ -111,7 +115,8 @@ export type ParentProfileResponse = {
   maskedPhone: string;
   notificationsEnabled: boolean;
   children: { id: string; studentId: string; name: string; grade: string; active: boolean }[];
-  teachers: { id: string; name: string; academy: string }[];
+  /** 🔴 `academy` 는 계약에 없다(백엔드 teacher_profiles 에 원본이 없음). `subject` 도 현재 항상 null. */
+  teachers: { id: string; name: string; subject: string | null }[];
 };
 
 export type ParentNotification = {
