@@ -25,6 +25,12 @@ describe("계약 → 도메인 adapter", () => {
     expect(toPercent(null)).toBeNull();
   });
 
+  it("🔴 계약 AreaTag 5종이 서로 다른 이름으로 나온다 — language 와 media 를 합치지 않는다", () => {
+    const labels = ["language", "media", "literature", "reading", "speech_writing"].map(areaLabel);
+    expect(new Set(labels).size).toBe(5);
+    expect(areaLabel("language")).not.toBe(areaLabel("media"));
+  });
+
   it("모르는 enum 값에도 죽지 않고 중립 표시로 떨어진다", () => {
     expect(areaLabel("reading")).toBe("독서");
     expect(areaLabel("한번도_본_적_없는_영역")).toBe("기타");

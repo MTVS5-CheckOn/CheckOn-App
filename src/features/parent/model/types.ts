@@ -1,4 +1,5 @@
-export type ParentRecordArea = "문학" | "독서" | "화법과작문" | "언어·매체";
+/** 🔴 계약 AreaTag 5종의 표시 이름. "언어·매체" 는 mock 픽스처가 쓰던 옛 묶음 이름이다. */
+export type ParentRecordArea = "문학" | "독서" | "화법과작문" | "언어" | "매체" | "언어·매체" | "기타";
 
 export type ParentRecord = {
   id: string;

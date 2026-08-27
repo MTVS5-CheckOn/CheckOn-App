@@ -28,9 +28,14 @@ import type { ConsultationStatus, ParentConsultation } from "@/features/parent/c
  * 모르는 값은 throw 하지 않고 "UNKNOWN" 계열로 떨어뜨린다 —
  * 서버가 enum 을 추가했을 때 앱이 죽으면 안 된다.
  */
+/**
+ * 🔴 계약 AreaTag 는 5종이고 `language` 와 `media` 는 **서로 다른 영역**이다
+ * (member-api.yaml:1647). 둘을 「언어·매체」 하나로 합치면 서로 다른 영역의
+ * 셀이 같은 이름으로 보이고, 차트 영역 수가 5종이 아니라 4종으로 줄어든다.
+ */
 const AREA_LABELS: Record<string, string> = {
-  language: "언어·매체",
-  media: "언어·매체",
+  language: "언어",
+  media: "매체",
   literature: "문학",
   reading: "독서",
   speech_writing: "화법과작문",
