@@ -55,13 +55,25 @@ export const attemptItemResultSchema = z.object({
 });
 
 export const learningRecordDetailSchema = learningRecordSummarySchema.extend({
-  items: z.array(attemptItemResultSchema),
+  /**
+   * 🔴 계약은 `items`·`weakness` 를 required 로 선언하지만(member-api.yaml:1996)
+   * 실제 백엔드는 `itemIds`(id 배열)·`weaknessStatus`(문자열)를 보낸다.
+   * required 로 두면 **학습기록 상세 화면이 502 로 죽는다.**
+   * 양쪽을 모두 받아들이되 없는 값은 만들어내지 않는다 —
+   * 문항별 결과와 약점 섹션은 값이 올 때만 화면에 그린다.
+   * 🔴 계약과 실제가 다른 지점이다 (readiness 「판단 필요」에 등재).
+   */
+  items: z.array(attemptItemResultSchema).nullish(),
+  /** 실제 백엔드가 보내는 형태. 문항 본문이 아니라 id 만 온다 — 화면에 쓸 수 없다. */
+  itemIds: z.array(z.string()).nullish(),
   weakness: z.object({
     status: valueStatusSchema,
     areaTag: areaTagSchema.nullish(),
     typeTag: typeTagSchema.nullish(),
     description: z.string().nullish(),
-  }),
+  }).nullish(),
+  /** 실제 백엔드가 보내는 형태(객체가 아니라 상태 문자열 하나). */
+  weaknessStatus: valueStatusSchema.nullish(),
   // 🔴 실제 집계 결과만 온다. 값이 없으면 빈 배열이고 지어내지 않는다.
   trend: z.array(z.object({
     month: z.string(),

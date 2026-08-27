@@ -75,15 +75,19 @@ export function toStudentRecord(dto: StudentRecordDto): LearningRecord {
 }
 
 export function toStudentRecordDetail(dto: StudentRecordDetailDto): LearningRecord {
+  // 🔴 실제 백엔드는 items 대신 itemIds 만 보내기도 한다(계약은 required).
+  //    문항 본문이 없으면 문항별 목록을 그릴 수 없다 — 없는 것을 계산해 채우지 않는다.
+  const weaknessStatus = dto.weakness?.status ?? dto.weaknessStatus ?? null;
+  const available = weaknessStatus === "AVAILABLE";
   return {
     ...toStudentRecord(dto),
-    weakness: dto.weakness.status === "AVAILABLE" ? areaLabel(dto.weakness.areaTag) : "",
-    weaknessDescription: dto.weakness.status === "AVAILABLE" ? dto.weakness.description ?? "" : "",
+    weakness: available ? areaLabel(dto.weakness?.areaTag) : "",
+    weaknessDescription: available ? dto.weakness?.description ?? "" : "",
     trend: (dto.trend ?? [])
       .filter((point) => point.status === "AVAILABLE" && point.accuracyRate != null)
       .map((point) => ({ label: point.month, accuracy: toPercent(point.accuracyRate) ?? 0 })),
     // 🔴 정답·해설은 서버가 준 것만 쓴다. 로컬에서 판정하지 않는다.
-    questions: dto.items.map((item, index) => ({
+    questions: (dto.items ?? []).map((item, index) => ({
       id: item.itemId,
       number: item.itemNo ?? index + 1,
       stem: item.stem ?? "",

@@ -138,7 +138,12 @@ function emptyRecordDetail(dto: RecordSummaryDto): ParentRecord["detail"] {
 
 export function toParentRecordDetail(dto: RecordDetailDto): ParentRecord {
   const base = toParentRecord(dto);
-  const wrongItems = dto.items.filter((item) => item.correct === false);
+  // 🔴 실제 백엔드는 items 대신 itemIds 만 보낸다. 문항 본문이 없으므로 문항별 결과를 그릴 수 없다.
+  //    itemIds 로 오답 수를 세지 않는다 — 서버가 나중에 같은 값을 내면 두 값이 갈린다.
+  const items = dto.items ?? [];
+  // weakness 객체가 없으면 weaknessStatus 문자열만 온다. 상태만 알고 내용은 모른다.
+  const weaknessStatus = dto.weakness?.status ?? dto.weaknessStatus ?? null;
+  const weaknessAvailable = weaknessStatus === "AVAILABLE";
   return {
     ...base,
     trend: (dto.trend ?? [])
@@ -146,17 +151,15 @@ export function toParentRecordDetail(dto: RecordDetailDto): ParentRecord {
       .map((point) => ({ label: point.month, accuracy: toPercent(point.accuracyRate) ?? 0 })),
     detail: {
       ...base.detail,
-      wrongTypeSummary: wrongItems.length ? `${wrongItems.length}문항 오답` : "",
-      overtimeQuestionSummary: "",
       correctCount: dto.correctCount,
-      // 🔴 계약에 원본이 없는 값은 채우지 않는다. 화면이 빈 상태를 그린다.
-      insight: dto.weakness.status === "AVAILABLE" ? dto.weakness.description ?? "" : "",
-      skillResults: dto.items.length
+      // 🔴 계약에 원본이 없는 값은 채우지 않는다. 화면이 그 자리를 렌더링하지 않는다.
+      insight: weaknessAvailable ? dto.weakness?.description ?? "" : "",
+      skillResults: weaknessAvailable && items.length
         ? [{
-            skill: typeLabel(dto.weakness.typeTag),
+            skill: typeLabel(dto.weakness?.typeTag),
             accuracy: toPercent(dto.accuracyRate),
             questionCount: dto.itemCount,
-            status: dto.weakness.status === "AVAILABLE" ? "weak" : "insufficient",
+            status: "weak",
           }]
         : [],
     },

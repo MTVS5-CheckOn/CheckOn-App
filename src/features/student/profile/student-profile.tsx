@@ -8,15 +8,17 @@ import { ROUTES, routeBuilders } from "@/config/routes";
 import { useLogoutMutation } from "@/features/auth/mutations";
 import { useStudentAuthStore } from "@/features/student/auth/student-auth.store";
 import { useStudentProfileQuery, useUpdateStudentNotificationsMutation } from "@/features/student/profile/queries";
+import { ActivationRequiredNotice, isActivationRequired } from "@/features/student/auth/activation-required-notice";
 
 export function StudentProfile() {
   const router = useRouter();
   const reset = useStudentAuthStore((state) => state.reset);
   const [showAccount, setShowAccount] = useState(false);
-  const { data: profile, isLoading, isError, refetch } = useStudentProfileQuery();
+  const { data: profile, isLoading, isError, error, refetch } = useStudentProfileQuery();
   const notificationMutation = useUpdateStudentNotificationsMutation();
   const logoutMutation = useLogoutMutation();
   if (isLoading) return <div className="space-y-3 p-5"><div className="h-24 animate-pulse rounded-card bg-[#E9EDF2]" /><div className="h-40 animate-pulse rounded-card bg-[#E9EDF2]" /></div>;
+  if (isActivationRequired(error)) return <ActivationRequiredNotice what="내 정보" />;
   if (isError || !profile) return <div className="p-8 text-center"><p className="text-sm font-bold">내 정보를 불러오지 못했어요.</p><button onClick={() => refetch()} className="mt-4 rounded-xl bg-brand px-5 py-2 text-sm font-bold">다시 시도</button></div>;
   const logout = async () => { try { await logoutMutation.mutateAsync(); reset(); router.replace(ROUTES.auth.studentLogin); } catch { return; } };
   return <div className="space-y-7 px-5 py-5">

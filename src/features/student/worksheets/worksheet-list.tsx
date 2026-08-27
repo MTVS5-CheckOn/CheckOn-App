@@ -6,15 +6,18 @@ import { useMemo, useState } from "react";
 import { routeBuilders } from "@/config/routes";
 import { useWorksheetsQuery } from "@/features/student/worksheets/queries";
 import type { WorksheetStatus } from "@/features/student/worksheets/types";
+import { ActivationRequiredNotice, isActivationRequired } from "@/features/student/auth/activation-required-notice";
 
 type Filter = "all" | "in_progress" | "completed";
 const FILTERS: { value: Filter; label: string }[] = [{ value: "all", label: "전체" }, { value: "in_progress", label: "진행 중" }, { value: "completed", label: "완료" }];
 
 export function WorksheetList() {
   const [filter, setFilter] = useState<Filter>("all");
-  const { data = [], isLoading, isError, refetch } = useWorksheetsQuery();
+  const { data = [], isLoading, isError, error, refetch } = useWorksheetsQuery();
   const worksheets = useMemo(() => data.filter((worksheet) => filter === "all" || worksheet.status === filter || (filter === "in_progress" && worksheet.status === "new")), [data, filter]);
 
+  // 🔴 403 STUDENT_ACTIVATION_REQUIRED 는 실패가 아니라 "아직 활성화 전"이다.
+  if (isActivationRequired(error)) return <ActivationRequiredNotice what="학습지" />;
   return (
     <div className="px-5 py-5">
       <div className="mb-3 flex gap-2" role="group" aria-label="학습지 상태 필터">{FILTERS.map((item) => <button key={item.value} type="button" onClick={() => setFilter(item.value)} aria-pressed={filter === item.value} className={`h-[34px] rounded-full border px-4 text-[13px] font-semibold ${filter === item.value ? "border-brand bg-brand text-[#4C3024]" : "border-border bg-surface text-muted"}`}>{item.label}</button>)}</div>

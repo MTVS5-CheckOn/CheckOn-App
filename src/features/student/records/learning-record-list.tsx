@@ -9,6 +9,7 @@ import { useLearningRecordStore } from "@/features/student/records/learning-reco
 import type { RecordArea } from "@/features/student/records/types";
 import { formatElapsed } from "@/features/student/quiz/format-time";
 import { formatMonthLabel } from "@/lib/format/date";
+import { ActivationRequiredNotice, isActivationRequired } from "@/features/student/auth/activation-required-notice";
 
 type AreaFilter = "전체" | RecordArea;
 const AREAS: AreaFilter[] = ["전체", "화법과작문", "언어·매체", "독서", "문학"];
@@ -16,7 +17,7 @@ const AREAS: AreaFilter[] = ["전체", "화법과작문", "언어·매체", "독
 export function LearningRecordList() {
   const [month, setMonth] = useState("");
   const [area, setArea] = useState<AreaFilter>("전체");
-  const { data = [], isLoading, isError, refetch } = useLearningRecordsQuery();
+  const { data = [], isLoading, isError, error, refetch } = useLearningRecordsQuery();
   const submittedRecords = useLearningRecordStore((state) => state.submittedRecords);
   const allRecords = useMemo(() => [...submittedRecords, ...data.filter((record) => !submittedRecords.some((submitted) => submitted.worksheetId === record.worksheetId))], [data, submittedRecords]);
   const months = useMemo(() => [...new Set(allRecords.map((record) => record.month))].sort().reverse(), [allRecords]);
@@ -27,6 +28,8 @@ export function LearningRecordList() {
   const totalSeconds = records.reduce((sum, record) => sum + record.elapsedSeconds, 0);
   const accuracy = totalQuestions ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
 
+  // 🔴 403 STUDENT_ACTIVATION_REQUIRED 는 실패가 아니라 "아직 활성화 전"이다.
+  if (isActivationRequired(error)) return <ActivationRequiredNotice what="학습기록" />;
   return <div className="space-y-4 px-5 py-5">
     <section className="rounded-card border border-border bg-surface p-5 shadow-[var(--checkon-shadow-card)]">
       <label className="flex items-center justify-between text-xs text-muted">학습 월
