@@ -63,9 +63,13 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
       body: body === undefined ? undefined : JSON.stringify(body),
     });
   } catch (error) {
-    if (error instanceof DOMException && error.name === "AbortError") {
+    // 🔴 abort 를 error 의 타입·이름으로 판정하지 않는다.
+    // fetch 구현(undici·MSW 등)에 따라 AbortError 가 다른 오류로 감싸여 올라와
+    // timeout 이 NETWORK_ERROR 로 잘못 분류된다. 우리가 켠 신호를 직접 본다.
+    if (timeoutController.signal.aborted) {
       throw new ApiError("요청 시간이 초과되었습니다.", 408, "REQUEST_TIMEOUT");
     }
+    if (signal?.aborted) throw error;
     throw new ApiError("서버에 연결할 수 없습니다.", 0, "NETWORK_ERROR", error);
   } finally {
     clearTimeout(timeoutId);
