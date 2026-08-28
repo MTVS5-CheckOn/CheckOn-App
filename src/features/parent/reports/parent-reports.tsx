@@ -7,14 +7,25 @@ import { isAccessExpired, reportFileGateway } from "@/features/parent/api/file-g
 import { routeBuilders } from "@/config/routes";
 import { useParentReportQuery, useParentReportsQuery } from "@/features/parent/api/queries";
 import { useSelectedChild } from "@/features/parent/shared/parent.store";
+import {
+  isParkSeoyeonDemoReport,
+  PARK_SEOYEON_DEMO_PDF_URL,
+  parkSeoyeonDemoReport,
+} from "@/features/parent/reports/demo-report";
 
 export function ParentReportList() {
   const [year, setYear] = useState<number | null>(null);
   const child = useSelectedChild();
   const { data = [], isLoading, isError, refetch } = useParentReportsQuery(child?.studentId ?? "");
-  const years = useMemo(() => [...new Set(data.map((item) => item.year))].sort((a, b) => b - a), [data]);
+  const reportSource = useMemo(
+    () => child?.name === parkSeoyeonDemoReport.studentName
+      ? [parkSeoyeonDemoReport, ...data.filter((item) => item.id !== parkSeoyeonDemoReport.id)]
+      : data,
+    [child?.name, data],
+  );
+  const years = useMemo(() => [...new Set(reportSource.map((item) => item.year))].sort((a, b) => b - a), [reportSource]);
   const selectedYear = year && years.includes(year) ? year : years[0] ?? null;
-  const reports = data.filter((item) => item.year === selectedYear);
+  const reports = reportSource.filter((item) => item.year === selectedYear);
   if (isLoading) return <div className="space-y-3 p-5"><div className="h-10 w-24 animate-pulse rounded-lg bg-[#E9EDF2]" /><div className="h-56 animate-pulse rounded-card bg-[#E9EDF2]" /></div>;
   if (isError) return <div className="p-8 text-center"><p className="text-sm font-bold">보고서를 불러오지 못했어요.</p><button onClick={() => refetch()} className="mt-4 rounded-xl bg-brand px-5 py-2 text-sm font-bold">다시 시도</button></div>;
   return <div className="px-5 py-4">{years.length ? <select aria-label="보고서 연도" value={selectedYear ?? ""} onChange={(event) => setYear(Number(event.target.value))} className="mb-4 h-10 rounded-lg bg-transparent text-base font-bold outline-none">{years.map((item) => <option key={item} value={item}>{item}년</option>)}</select> : null}{reports.length ? <section className="overflow-hidden rounded-card border border-border bg-surface">{reports.map((report) => <Link key={report.id} href={routeBuilders.parent.report(report.id)} className={`flex min-h-[76px] items-center gap-3 border-b border-divider px-4 py-3 last:border-0 ${report.isNew ? "bg-[#FFFDF0]" : ""}`}><div className="min-w-0 flex-1"><div className="flex items-center gap-2">{report.isNew ? <span className="rounded-md bg-brand px-2 py-1 text-[11px] font-bold text-[#7D452C]">NEW</span> : null}<h2 className="font-bold">{report.year}년 {report.month}월</h2></div><p className="mt-1 text-xs text-subtle">{report.teacher} · {report.issuedAt} 발행</p></div>{!report.isNew ? <span className="text-xs text-subtle">확인</span> : null}<ChevronRight size={17} className="text-subtle" /></Link>)}</section> : <EmptyReport />}</div>;
@@ -22,7 +33,10 @@ export function ParentReportList() {
 
 export function ParentReportDetail({ reportId }: { reportId: string }) {
   const child = useSelectedChild();
-  const { data: report, isLoading, isError, refetch } = useParentReportQuery(child?.studentId ?? "", reportId);
+  const demo = isParkSeoyeonDemoReport(reportId);
+  const reportQuery = useParentReportQuery(demo ? "" : child?.studentId ?? "", reportId);
+  const report = demo ? parkSeoyeonDemoReport : reportQuery.data;
+  const { isLoading, isError, refetch } = reportQuery;
   const [shared, setShared] = useState(false);
   if (isLoading) return <div className="space-y-3 p-5"><div className="h-56 animate-pulse rounded-card bg-[#E9EDF2]" /><div className="h-40 animate-pulse rounded-card bg-[#E9EDF2]" /></div>;
   if (isError) return <div className="p-8 text-center"><p className="text-sm font-bold">보고서를 불러오지 못했어요.</p><button onClick={() => refetch()} className="mt-4 rounded-xl bg-brand px-5 py-2 text-sm font-bold">다시 시도</button></div>;
@@ -66,7 +80,10 @@ export function ParentReportDetail({ reportId }: { reportId: string }) {
 
 export function ParentPdfViewer({ reportId }: { reportId: string }) {
   const child = useSelectedChild();
-  const { data: report, isLoading, isError, refetch } = useParentReportQuery(child?.studentId ?? "", reportId);
+  const demo = isParkSeoyeonDemoReport(reportId);
+  const reportQuery = useParentReportQuery(demo ? "" : child?.studentId ?? "", reportId);
+  const report = demo ? parkSeoyeonDemoReport : reportQuery.data;
+  const { isLoading, isError, refetch } = reportQuery;
   const [pending, setPending] = useState(false);
   const [failed, setFailed] = useState(false);
 
@@ -75,6 +92,10 @@ export function ParentPdfViewer({ reportId }: { reportId: string }) {
    * 그래서 useQuery 로 캐시하지 않는다.
    */
   async function openPdf() {
+    if (demo) {
+      window.open(PARK_SEOYEON_DEMO_PDF_URL, "_blank", "noopener,noreferrer");
+      return;
+    }
     if (!child?.studentId) return;
     setPending(true);
     setFailed(false);
@@ -112,7 +133,9 @@ export function ParentPdfViewer({ reportId }: { reportId: string }) {
       <section className="w-full rounded-card border border-border bg-surface px-5 py-12 text-center">
         <FileText className="mx-auto text-[#D96534]" size={28} />
         <p className="mt-3 text-sm font-bold">{report.year}년 {report.month}월 보고서</p>
-        <p className="mt-1 text-xs leading-5 text-muted">보안을 위해 열람 링크는 열 때마다 새로 발급되고<br />짧은 시간이 지나면 만료됩니다.</p>
+        <p className="mt-1 text-xs leading-5 text-muted">{demo
+          ? <>2026년 8월 20일 발행된<br />박서연 학생의 시연용 월간 리포트입니다.</>
+          : <>보안을 위해 열람 링크는 열 때마다 새로 발급되고<br />짧은 시간이 지나면 만료됩니다.</>}</p>
         {failed ? <p className="mt-3 text-xs font-semibold text-[#D64545]">열람 링크를 발급하지 못했어요. 다시 시도해 주세요.</p> : null}
         <button onClick={openPdf} disabled={pending} className="mt-5 inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-brand text-sm font-bold text-[#4C3024] disabled:opacity-60">
           <Download size={18} />{pending ? "링크 발급 중..." : "PDF 보고서 열기"}

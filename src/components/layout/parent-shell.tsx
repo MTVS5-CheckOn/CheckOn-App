@@ -40,7 +40,8 @@ export function ParentShell({ children }: { children: React.ReactNode }) {
   const child = useSelectedChild();
   const hydrateProfile = useParentStore((state) => state.hydrateProfile);
   const isAuthRoute = pathname === ROUTES.auth.parentLogin || pathname === ROUTES.auth.parentSignup;
-  const profileQuery = useParentProfileQuery();
+  // 로그인 전 401 요청이 캐시에 남으면 로그인 후에도 자녀 목록을 못 받아 홈 조회가 막힌다.
+  const profileQuery = useParentProfileQuery({ enabled: !isAuthRoute });
   const notificationsQuery = useParentNotificationsQuery({ enabled: !isAuthRoute });
   useEffect(() => { if (profileQuery.data) hydrateProfile(profileQuery.data); }, [hydrateProfile, profileQuery.data]);
   if (isAuthRoute) return <>{children}</>;

@@ -17,10 +17,15 @@ export const useParentAnalysisQuery = (studentId: string, month: string = curren
 });
 export const useParentReportsQuery = (studentId: string) => useQuery({ queryKey: queryKeys.parent.reports(studentId), queryFn: () => parentGateway.listReports(studentId), select: (page) => page.items, enabled: Boolean(studentId) });
 export const useParentReportQuery = (studentId: string, reportId: string) => useQuery({ queryKey: queryKeys.parent.report(studentId, reportId), queryFn: () => parentGateway.getReport(studentId, reportId), enabled: Boolean(studentId && reportId) });
-export const useParentProfileQuery = () => useQuery({ queryKey: queryKeys.parent.profile(), queryFn: () => parentGateway.getProfile() });
-type ParentNotificationQueryOptions = { enabled?: boolean };
+type ParentQueryOptions = { enabled?: boolean };
 
-export const useParentNotificationsQuery = ({ enabled = true }: ParentNotificationQueryOptions = {}) => useQuery({
+export const useParentProfileQuery = ({ enabled = true }: ParentQueryOptions = {}) => useQuery({
+  queryKey: queryKeys.parent.profile(),
+  queryFn: () => parentGateway.getProfile(),
+  enabled,
+});
+
+export const useParentNotificationsQuery = ({ enabled = true }: ParentQueryOptions = {}) => useQuery({
   queryKey: queryKeys.parent.notifications({ limit: 50 }),
   queryFn: () => parentGateway.listNotifications({ limit: 50 }),
   select: (page) => page.items,

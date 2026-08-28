@@ -36,6 +36,8 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     setAccessToken(null);
     // 남은 캐시가 다음 로그인 계정 화면에 섞이지 않도록 비운다.
     queryClient.clear();
+    // 공개 인증 화면에서 발생한 부수 요청이 로그인 화면 자기 자신으로 리다이렉트하면 안 된다.
+    if (isPublicPath(pathname)) return;
     router.replace(`${loginPathFor(pathname)}?returnTo=${encodeURIComponent(pathname)}`);
   }), [pathname, router, queryClient]);
 
